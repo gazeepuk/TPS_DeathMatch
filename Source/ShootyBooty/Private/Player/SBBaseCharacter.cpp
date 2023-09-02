@@ -2,12 +2,16 @@
 
 
 #include "Player/SBBaseCharacter.h"
+
+#include "Camera/CameraComponent.h"
 // Sets default values
 ASBBaseCharacter::ASBBaseCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
+	CameraComponent->SetupAttachment(GetRootComponent());
 }
 // Called when the game starts or when spawned
 void ASBBaseCharacter::BeginPlay()

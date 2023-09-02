@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "SBBaseCharacter.generated.h"
 
+class UCameraComponent;
+
 UCLASS()
 class SHOOTYBOOTY_API ASBBaseCharacter : public ACharacter
 {
@@ -19,6 +21,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UCameraComponent* CameraComponent;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
