@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "SBBaseCharacter.generated.h"
 
+class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
@@ -15,7 +16,7 @@ class SHOOTYBOOTY_API ASBBaseCharacter : public ACharacter
 
 public:
 	// Sets default values for this character's properties
-	ASBBaseCharacter();
+	ASBBaseCharacter(const FObjectInitializer& ObjInit);
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,6 +24,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCameraComponent* CameraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	USpringArmComponent* SpringArmComponent;
+	
+	bool bWantsToRun = false;
+	bool bMovingForward = false;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -30,4 +37,16 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	bool IsRunning() const;
+
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	float GetMoveDirection() const;
+
+	
+private:
+	void MoveForward(float Amount);
+	void MoveRight(float Amount);
+	void OnStartRunning();
+	void OnStopRunning();
 };
