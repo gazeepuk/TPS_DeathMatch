@@ -4,10 +4,15 @@
 #include "Player/SBBaseCharacter.h"
 
 #include "SBCharacterMovementComponent.h"
+#include "SBHealthComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/TextRenderComponent.h"
+#include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-// Sets default values
+
+DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All,All);
+
 ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 	: Super(ObjInit.SetDefaultSubobjectClass<USBCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
@@ -20,19 +25,33 @@ ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
-	
+
+	HealthComponent = CreateDefaultSubobject<USBHealthComponent>("HealthComponent");
+
+	HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("TextRenderComponent");
+	HealthTextComponent->SetupAttachment(GetRootComponent());
+
 }
 
 // Called when the game starts or when spawned
 void ASBBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-}
+
+	check(HealthComponent)
+	check(HealthTextComponent)
+
+	}
 
 // Called every frame
 void ASBBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	const auto Health = HealthComponent->GetHealth();
+	HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"),Health)));
+
+	TakeDamage(0.1f,FDamageEvent{}, Controller, this);
 }
 
 // Called to bind functionality to input
@@ -84,3 +103,5 @@ void ASBBaseCharacter::OnStopRunning()
 {
 	bWantsToRun = false;
 }
+
+

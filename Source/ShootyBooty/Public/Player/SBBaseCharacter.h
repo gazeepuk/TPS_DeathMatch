@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "SBBaseCharacter.generated.h"
 
+class UTextRenderComponent;
+class USBHealthComponent;
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -28,6 +30,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	USBHealthComponent* HealthComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UTextRenderComponent* HealthTextComponent;
+	
 	bool bWantsToRun = false;
 	bool bMovingForward = false;
 public:	
@@ -49,4 +57,5 @@ private:
 	void MoveRight(float Amount);
 	void OnStartRunning();
 	void OnStopRunning();
+
 };
