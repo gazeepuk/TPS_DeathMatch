@@ -7,11 +7,10 @@
 #include "SBHealthComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/TextRenderComponent.h"
-#include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
-DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All,All);
+DEFINE_LOG_CATEGORY_STATIC(LogBaseCharacterLog, All, All);
 
 ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 	: Super(ObjInit.SetDefaultSubobjectClass<USBCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -31,6 +30,7 @@ ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 	HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("TextRenderComponent");
 	HealthTextComponent->SetupAttachment(GetRootComponent());
 
+	
 }
 
 // Called when the game starts or when spawned
@@ -41,17 +41,15 @@ void ASBBaseCharacter::BeginPlay()
 	check(HealthComponent)
 	check(HealthTextComponent)
 
-	}
+	OnHealthChanged(HealthComponent->GetHealth());
+	HealthComponent->OnDeath.AddUObject(this, &ASBBaseCharacter::OnDeath);
+	HealthComponent->OnHealthChanged.AddUObject(this, &ASBBaseCharacter::OnHealthChanged);
+}
 
 // Called every frame
 void ASBBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	const auto Health = HealthComponent->GetHealth();
-	HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"),Health)));
-
-	TakeDamage(0.1f,FDamageEvent{}, Controller, this);
 }
 
 // Called to bind functionality to input
@@ -75,7 +73,7 @@ bool ASBBaseCharacter::IsRunning() const
 
 float ASBBaseCharacter::GetMoveDirection() const
 {
-	if(GetVelocity().IsZero())  return 0.0f;
+	if (GetVelocity().IsZero()) return 0.0f;
 	const auto VelocityNormal = GetVelocity().GetSafeNormal();
 	const auto AngelBetween = FMath::Acos(FVector::DotProduct(GetActorForwardVector(), VelocityNormal));
 	const auto CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
@@ -100,8 +98,26 @@ void ASBBaseCharacter::OnStartRunning()
 }
 
 void ASBBaseCharacter::OnStopRunning()
-{
+{	
 	bWantsToRun = false;
 }
 
+void ASBBaseCharacter::OnDeath()
+{
+	UE_LOG(LogBaseCharacterLog, Error, TEXT("Player %s is dead"),*GetName())
 
+	PlayAnimMontage(AnimMontage);
+	GetCharacterMovement()->DisableMovement();
+
+	SetLifeSpan(5.0f);
+
+	if(Controller)
+	{
+		Controller->ChangeState(NAME_Spectating);
+	}
+}
+
+void ASBBaseCharacter::OnHealthChanged(float Health)
+{
+	HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+}
