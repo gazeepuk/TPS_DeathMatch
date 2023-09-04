@@ -38,6 +38,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* AnimMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category="Movement")
+	FVector2D LandedDamageVelocity = FVector2D(900.0f, 1200.0f);
+	
+	UPROPERTY(EditDefaultsOnly, Category="Movement")
+	FVector2D LandedDamage = FVector2D(10.0f,100.0f);
 	
 	bool bWantsToRun = false;
 	bool bMovingForward = false;
@@ -63,5 +69,8 @@ private:
 	void OnStopRunning();
 	void OnDeath();
 	void OnHealthChanged(float Health);
+
+	UFUNCTION()
+	void OnGroundLanded(const FHitResult& Hit);
 
 };

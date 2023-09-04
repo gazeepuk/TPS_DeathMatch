@@ -15,15 +15,22 @@ USBHealthComponent::USBHealthComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+void USBHealthComponent::OnHealed()
+{
+	SetHealth(Health+HealthModifier);
+	if(Health == MaxHealth && GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
+	}
+}
+
 
 // Called when the game starts
 void USBHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Health = MaxHealth;
-	OnHealthChanged.Broadcast(Health);
-	
+	SetHealth(MaxHealth);
 	AActor* ComponentOwner = GetOwner();
 	if (ComponentOwner)
 	{
@@ -34,13 +41,25 @@ void USBHealthComponent::BeginPlay()
 void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
                                          AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (Damage <= 0 || IsDead()) return;
+	GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
 
-	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
-	OnHealthChanged.Broadcast(Health);
+	if (Damage <= 0 || IsDead() || !GetWorld()) return;
 
-	if(IsDead())
+	SetHealth(Health-Damage);
+
+	if (IsDead())
 	{
 		OnDeath.Broadcast();
 	}
+	else if (bAutoHeal)
+	{
+		GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &USBHealthComponent::OnHealed,
+		                                       HealthUpdateTime, true, HealthDelay);
+	}
+}
+
+void USBHealthComponent::SetHealth(float NewHealth)
+{
+	Health = FMath::Clamp(NewHealth,0.0f,MaxHealth);
+	OnHealthChanged.Broadcast(Health);
 }

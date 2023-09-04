@@ -9,7 +9,7 @@
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-
+#include "Engine/DamageEvents.h"
 DEFINE_LOG_CATEGORY_STATIC(LogBaseCharacterLog, All, All);
 
 ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
@@ -44,6 +44,8 @@ void ASBBaseCharacter::BeginPlay()
 	OnHealthChanged(HealthComponent->GetHealth());
 	HealthComponent->OnDeath.AddUObject(this, &ASBBaseCharacter::OnDeath);
 	HealthComponent->OnHealthChanged.AddUObject(this, &ASBBaseCharacter::OnHealthChanged);
+
+	LandedDelegate.AddDynamic(this, &ASBBaseCharacter::OnGroundLanded);
 }
 
 // Called every frame
@@ -120,4 +122,16 @@ void ASBBaseCharacter::OnDeath()
 void ASBBaseCharacter::OnHealthChanged(float Health)
 {
 	HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+}
+
+void ASBBaseCharacter::OnGroundLanded(const FHitResult& Hit)
+{
+	const auto FallVelocityZ = GetCharacterMovement()->Velocity.Z * -1;
+	UE_LOG(LogBaseCharacterLog, Warning, TEXT("Landed. Velocity Z: %f"),FallVelocityZ)
+
+	if(FallVelocityZ<LandedDamageVelocity.X) return;
+
+	const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity,LandedDamage,FallVelocityZ);
+	UE_LOG(LogBaseCharacterLog, Warning, TEXT("FinalDamage: %f"),FinalDamage)
+	TakeDamage(FinalDamage, FDamageEvent{},nullptr, nullptr);
 }
