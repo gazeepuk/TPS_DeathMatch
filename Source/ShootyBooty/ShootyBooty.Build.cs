@@ -12,7 +12,7 @@ public class ShootyBooty : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		PublicIncludePaths.AddRange(new string[]{"ShootyBooty/Public/Player", "ShootyBooty/Public/Components", "ShootyBooty/Public/Dev"});
+		PublicIncludePaths.AddRange(new string[]{"ShootyBooty/Public/Player", "ShootyBooty/Public/Components", "ShootyBooty/Public/Dev", "ShootyBooty/Public/Weapon", "ShootyBooty/Public/UI"});
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		

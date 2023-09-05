@@ -3,6 +3,7 @@
 
 #include "Player/SBBaseCharacter.h"
 
+#include "SBBaseWeapon.h"
 #include "SBCharacterMovementComponent.h"
 #include "SBHealthComponent.h"
 #include "Camera/CameraComponent.h"
@@ -21,7 +22,8 @@ ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->bUsePawnControlRotation = true;
-
+	SpringArmComponent->SocketOffset = FVector(0,100.0f,80.0f);
+	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
@@ -29,7 +31,7 @@ ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 
 	HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("TextRenderComponent");
 	HealthTextComponent->SetupAttachment(GetRootComponent());
-
+	HealthTextComponent->SetOwnerNoSee(true);
 	
 }
 
@@ -46,6 +48,8 @@ void ASBBaseCharacter::BeginPlay()
 	HealthComponent->OnHealthChanged.AddUObject(this, &ASBBaseCharacter::OnHealthChanged);
 
 	LandedDelegate.AddDynamic(this, &ASBBaseCharacter::OnGroundLanded);
+
+	SpawnWeapon();
 }
 
 // Called every frame
@@ -134,4 +138,15 @@ void ASBBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 	const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity,LandedDamage,FallVelocityZ);
 	UE_LOG(LogBaseCharacterLog, Warning, TEXT("FinalDamage: %f"),FinalDamage)
 	TakeDamage(FinalDamage, FDamageEvent{},nullptr, nullptr);
+}
+
+void ASBBaseCharacter::SpawnWeapon()
+{
+	if(!GetWorld()) return;
+	const auto Weapon = GetWorld()->SpawnActor<ASBBaseWeapon>(WeaponClass);
+	if(Weapon)
+	{
+		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget,false);
+		Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponSocket");
+	}
 }
