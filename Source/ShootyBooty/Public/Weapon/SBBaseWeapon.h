@@ -16,12 +16,18 @@ class SHOOTYBOOTY_API ASBBaseWeapon : public AActor
 public:	
 	ASBBaseWeapon();
 
+	virtual void Fire();
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* WeaponMesh;
-	
-public:	
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FName MuzzleSocketName = "MuzzleSocket";
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float TraceMaxDistance = 1500.0f;
+
+	void MakeShot();
 };

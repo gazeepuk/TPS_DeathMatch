@@ -3,9 +3,9 @@
 
 #include "Player/SBBaseCharacter.h"
 
-#include "SBBaseWeapon.h"
 #include "SBCharacterMovementComponent.h"
 #include "SBHealthComponent.h"
+#include "SBWeaponComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -32,7 +32,8 @@ ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 	HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("TextRenderComponent");
 	HealthTextComponent->SetupAttachment(GetRootComponent());
 	HealthTextComponent->SetOwnerNoSee(true);
-	
+
+	WeaponComponent = CreateDefaultSubobject<USBWeaponComponent>("WeaponComponent");
 }
 
 // Called when the game starts or when spawned
@@ -40,17 +41,17 @@ void ASBBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	check(HealthComponent)
-	check(HealthTextComponent)
+	check(HealthComponent);
+	check(HealthTextComponent);
+	check(GetCharacterMovement());
 
 	OnHealthChanged(HealthComponent->GetHealth());
 	HealthComponent->OnDeath.AddUObject(this, &ASBBaseCharacter::OnDeath);
 	HealthComponent->OnHealthChanged.AddUObject(this, &ASBBaseCharacter::OnHealthChanged);
-
+	
 	LandedDelegate.AddDynamic(this, &ASBBaseCharacter::OnGroundLanded);
 
-	SpawnWeapon();
-}
+} 
 
 // Called every frame
 void ASBBaseCharacter::Tick(float DeltaTime)
@@ -63,6 +64,9 @@ void ASBBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	check(PlayerInputComponent)
+	check(WeaponComponent)
+	
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASBBaseCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASBBaseCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("TurnAround", this, &ASBBaseCharacter::AddControllerYawInput);
@@ -70,6 +74,7 @@ void ASBBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASBBaseCharacter::Jump);
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASBBaseCharacter::OnStartRunning);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &ASBBaseCharacter::OnStopRunning);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USBWeaponComponent::Fire);
 }
 
 bool ASBBaseCharacter::IsRunning() const
@@ -140,13 +145,4 @@ void ASBBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 	TakeDamage(FinalDamage, FDamageEvent{},nullptr, nullptr);
 }
 
-void ASBBaseCharacter::SpawnWeapon()
-{
-	if(!GetWorld()) return;
-	const auto Weapon = GetWorld()->SpawnActor<ASBBaseWeapon>(WeaponClass);
-	if(Weapon)
-	{
-		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget,false);
-		Weapon->AttachToComponent(GetMesh(), AttachmentRules, "WeaponSocket");
-	}
-}
+
