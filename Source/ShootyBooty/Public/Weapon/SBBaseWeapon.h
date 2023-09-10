@@ -8,31 +8,34 @@
 
 class USkeletalMeshComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class SHOOTYBOOTY_API ASBBaseWeapon : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	ASBBaseWeapon();
-
-	virtual void Fire();
+	
+	virtual void StartFire();
+	virtual void StopFire();
+	
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	FName MuzzleSocketName = "MuzzleSocket";
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	float TraceMaxDistance = 1500.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	float DamageAmount = 10.0f;
 
-	void MakeShot();
+
+	virtual void MakeShot();
 
 	APlayerController* GetPlayerController() const;
 
@@ -40,9 +43,9 @@ protected:
 
 	FVector GetMuzzleWorldLocation() const;
 
-	bool GetTraceData(FVector& TraceStart, FVector& TraceEnd);
+	virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd);
 
 	void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
-
-	void MakeDamage(FHitResult& HitResult);
+	
+	FTimerHandle ShotTimerHandle;
 };

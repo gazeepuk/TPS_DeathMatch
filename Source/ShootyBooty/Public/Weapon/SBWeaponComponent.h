@@ -15,7 +15,9 @@ class SHOOTYBOOTY_API USBWeaponComponent : public UActorComponent
 public:	
 	USBWeaponComponent();
 
-	void Fire();
+	void StartFire();
+	void StopFire();
+	
 protected:
 	virtual void BeginPlay() override;
 

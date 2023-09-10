@@ -22,35 +22,17 @@ void ASBBaseWeapon::BeginPlay()
 	check(WeaponMesh);
 }
 
-
-void ASBBaseWeapon::Fire()
+void ASBBaseWeapon::StartFire()
 {
 	MakeShot();
 }
 
+void ASBBaseWeapon::StopFire()
+{
+}
+
 void ASBBaseWeapon::MakeShot()
 {
-	if (!GetWorld())return;
-
-	FVector TraceStart, TraceEnd;
-	if (!GetTraceData(TraceStart, TraceEnd)) return;
-
-	FHitResult HitResult;
-	MakeHit(HitResult, TraceStart, TraceEnd);
-
-	if (HitResult.bBlockingHit)
-	{
-		MakeDamage(HitResult);
-		
-		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0.0f,
-		              3.0f);
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
-		
-	}
-	else
-	{
-		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0.0f, 3.0f);
-	}
 }
 
 APlayerController* ASBBaseWeapon::GetPlayerController() const
@@ -67,7 +49,7 @@ APlayerController* ASBBaseWeapon::GetPlayerController() const
 bool ASBBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
 {
 	const auto Controller = GetPlayerController();
-	if (!Controller) false;
+	if (!Controller) return false;
 
 	Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
 	return true;
@@ -99,12 +81,4 @@ void ASBBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
 
 	HitResult;
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
-}
-
-void ASBBaseWeapon::MakeDamage(FHitResult& HitResult)
-{
-	const auto DamagedActor = HitResult.GetActor();
-	if(!DamagedActor) return;
-
-	DamagedActor->TakeDamage(DamageAmount, FDamageEvent{}, GetPlayerController(), this);
 }

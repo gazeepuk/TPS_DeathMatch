@@ -12,10 +12,16 @@ USBWeaponComponent::USBWeaponComponent()
 
 }
 
-void USBWeaponComponent::Fire()
+void USBWeaponComponent::StartFire()
 {
 	if(!CurrentWeapon) return;
-	CurrentWeapon->Fire();
+	CurrentWeapon->StartFire();
+}
+
+void USBWeaponComponent::StopFire()
+{
+	if(!CurrentWeapon) return;
+	CurrentWeapon->StopFire();
 }
 
 
