@@ -17,22 +17,30 @@ public:
 
 	void StartFire();
 	void StopFire();
-	
+	void NextWeapon();
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
-	TSubclassOf<ASBBaseWeapon> WeaponClass;
+	TArray<TSubclassOf<ASBBaseWeapon>> WeaponClasses;
 
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
-	FName WeaponAttachPointName;
+	FName WeaponEquipSocketName = "WeaponSocket";
 
-
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	FName WeaponArmorySocketName = "ArmorySocket"; 
+	
 private:
 
 	UPROPERTY()
 	ASBBaseWeapon* CurrentWeapon;
 
-	void SpawnWeapon();
+	UPROPERTY()
+	TArray<ASBBaseWeapon*> Weapons;
+
+	int32 CurrentWeaponIndex = 0;
 	
+	void SpawnWeapons();
+	void AttachWeaponToSocket(ASBBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
+	void EquipWeapon(int32 WeaponIndex);
 };

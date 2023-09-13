@@ -9,19 +9,24 @@
 USBWeaponComponent::USBWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
 }
 
 void USBWeaponComponent::StartFire()
 {
-	if(!CurrentWeapon) return;
+	if (!CurrentWeapon) return;
 	CurrentWeapon->StartFire();
 }
 
 void USBWeaponComponent::StopFire()
 {
-	if(!CurrentWeapon) return;
+	if (!CurrentWeapon) return;
 	CurrentWeapon->StopFire();
+}
+
+void USBWeaponComponent::NextWeapon()
+{
+	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
+	EquipWeapon(CurrentWeaponIndex);
 }
 
 
@@ -29,21 +34,46 @@ void USBWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SpawnWeapon();
+	CurrentWeaponIndex = 0;
+	SpawnWeapons();
+	EquipWeapon(CurrentWeaponIndex);
 }
 
 
-void USBWeaponComponent::SpawnWeapon()
+void USBWeaponComponent::SpawnWeapons()
 {
-	if(!GetWorld()) return;
-	CurrentWeapon = GetWorld()->SpawnActor<ASBBaseWeapon>(WeaponClass);
-	if(CurrentWeapon)
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (!Character || !GetWorld()) return;
+
+	for (auto WeaponClass : WeaponClasses)
 	{
-		ACharacter* Character = Cast<ACharacter>(GetOwner());
-		if(!Character) return;
-		
-		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget,false);
-		CurrentWeapon->AttachToComponent( Character->GetMesh(), AttachmentRules, WeaponAttachPointName);
-		CurrentWeapon->SetOwner(Character);
+		auto Weapon = GetWorld()->SpawnActor<ASBBaseWeapon>(WeaponClass);
+		if (!Weapon) continue;
+		Weapon->SetOwner(Character);
+		Weapons.Add(Weapon);
+
+		AttachWeaponToSocket(Weapon, Character->GetMesh(), WeaponArmorySocketName);
 	}
+}
+
+void USBWeaponComponent::AttachWeaponToSocket(ASBBaseWeapon* Weapon, USceneComponent* SceneComponent,
+                                              const FName& SocketName)
+{
+	if (!Weapon || !SceneComponent) return;
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+	Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
+}
+
+void USBWeaponComponent::EquipWeapon(int32 WeaponIndex)
+{
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (!Character) return;
+
+	if (CurrentWeapon)
+	{
+		AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
+	}
+
+	CurrentWeapon = Weapons[WeaponIndex];
+	AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
 }
