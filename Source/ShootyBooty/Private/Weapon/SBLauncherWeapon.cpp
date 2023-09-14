@@ -7,8 +7,11 @@
 
 void ASBLauncherWeapon::MakeShot()
 {
-	if (!GetWorld())return;
-
+	
+	Super::MakeShot();
+	
+	if (!GetWorld() || IsAmmoEmpty())return;
+	
 	FVector TraceStart, TraceEnd;
 	if (!GetTraceData(TraceStart, TraceEnd)) return;
 

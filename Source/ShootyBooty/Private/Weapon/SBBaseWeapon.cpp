@@ -20,6 +20,7 @@ void ASBBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	check(WeaponMesh);
+	CurrentAmmo = DefaultAmmo;
 }
 
 void ASBBaseWeapon::StartFire()
@@ -33,6 +34,10 @@ void ASBBaseWeapon::StopFire()
 
 void ASBBaseWeapon::MakeShot()
 {
+	if(!IsAmmoEmpty())
+	{
+		DecreaseAmmo();
+	}
 }
 
 APlayerController* ASBBaseWeapon::GetPlayerController() const
@@ -81,4 +86,60 @@ void ASBBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
 
 	HitResult;
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
+}
+
+void ASBBaseWeapon::DecreaseAmmo()
+{
+	if (IsClipEmpty())
+	{
+		UE_LOG(LogBaseWeapon, Error, TEXT("-------Clip is empty-------"));
+		return;
+	}
+	
+	CurrentAmmo.Bullets--;
+	LogAmmo();
+
+	if (IsClipEmpty() && !IsAmmoEmpty())
+	{
+		StopFire();
+		OnClipEmpty.Broadcast();
+	}
+}
+
+bool ASBBaseWeapon::IsAmmoEmpty() const
+{
+	UE_LOG(LogTemp, Warning, TEXT("Is Ammo Empty: %d"), !CurrentAmmo.bInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty())
+	return !CurrentAmmo.bInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
+}
+
+bool ASBBaseWeapon::IsClipEmpty() const
+{
+	return CurrentAmmo.Bullets == 0;
+}
+
+void ASBBaseWeapon::ChangeClip()
+{
+	if (!CurrentAmmo.bInfinite)
+	{
+		if (CurrentAmmo.Clips == 0)
+		{
+			UE_LOG(LogBaseWeapon, Error, TEXT("-------No More Clips-------"));
+			return;
+		}
+		CurrentAmmo.Clips--;
+	}
+	CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+	UE_LOG(LogBaseWeapon, Warning, TEXT("-------Change Clip-------"));
+}
+
+bool ASBBaseWeapon::CanReload() const
+{
+	return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
+}
+
+void ASBBaseWeapon::LogAmmo()
+{
+	FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + "/";
+	AmmoInfo += CurrentAmmo.bInfinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
+	UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }

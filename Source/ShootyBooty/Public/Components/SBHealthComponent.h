@@ -17,16 +17,20 @@ class SHOOTYBOOTY_API USBHealthComponent : public UActorComponent
 public:
 	USBHealthComponent();
 
-	float GetHealth() const { return Health; }
+	FOnDeath OnDeath;
+	FOnHealthChanged OnHealthChanged;	
 
+	float GetHealth() const { return CurrentHealth; }
+	
+	UFUNCTION(BlueprintCallable, Category="Health")
+	float GetHealthPercent() const { return CurrentHealth/MaxHealth;}
+	
 	UFUNCTION(BlueprintCallable)
-	bool IsDead() const {return  FMath::IsNearlyZero(Health);}
+	bool IsDead() const {return  FMath::IsNearlyZero(CurrentHealth);}
 
 	UFUNCTION(BlueprintCallable)
 	void OnHealed();
-	
-	FOnDeath OnDeath;
-	FOnHealthChanged OnHealthChanged;	
+
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin="0.0", ClampMax="1000"), Category="Health")
@@ -47,6 +51,6 @@ private:
 	UFUNCTION()
 	void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatedBy, AActor* DamageCauser);
-	float Health = 0.0f;
+	float CurrentHealth = 0.0f;
 	void SetHealth(float NewHealth);
 };

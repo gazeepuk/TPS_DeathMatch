@@ -2,9 +2,6 @@
 
 
 #include "Components/SBHealthComponent.h"
-
-#include "Dev/SBFireDamageType.h"
-#include "Dev/SBIceDamageType.h"
 #include "GameFramework/Actor.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
@@ -17,8 +14,8 @@ USBHealthComponent::USBHealthComponent()
 
 void USBHealthComponent::OnHealed()
 {
-	SetHealth(Health+HealthModifier);
-	if(Health == MaxHealth && GetWorld())
+	SetHealth(CurrentHealth+HealthModifier);
+	if(CurrentHealth == MaxHealth && GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
 	}
@@ -29,7 +26,8 @@ void USBHealthComponent::OnHealed()
 void USBHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	check(MaxHealth > 0);
+	
 	SetHealth(MaxHealth);
 	AActor* ComponentOwner = GetOwner();
 	if (ComponentOwner)
@@ -45,7 +43,7 @@ void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, con
 
 	if (Damage <= 0 || IsDead() || !GetWorld()) return;
 
-	SetHealth(Health-Damage);
+	SetHealth(CurrentHealth-Damage);
 
 	if (IsDead())
 	{
@@ -60,6 +58,6 @@ void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, con
 
 void USBHealthComponent::SetHealth(float NewHealth)
 {
-	Health = FMath::Clamp(NewHealth,0.0f,MaxHealth);
-	OnHealthChanged.Broadcast(Health);
+	CurrentHealth = FMath::Clamp(NewHealth,0.0f,MaxHealth);
+	OnHealthChanged.Broadcast(CurrentHealth);
 }

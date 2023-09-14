@@ -2,11 +2,12 @@
 
 
 #include "Weapon/SBRifleWeapon.h"
+#include"Engine/DamageEvents.h"
 
 void ASBRifleWeapon::StartFire()
 {
-	Super::StartFire();
 	GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASBBaseWeapon::StartFire, TimeBetweenShots, true);
+	Super::StartFire();
 }
 
 void ASBRifleWeapon::StopFire()
@@ -31,10 +32,19 @@ bool ASBRifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd)
 
 void ASBRifleWeapon::MakeShot()
 {
-	if (!GetWorld())return;
+	Super::MakeShot();
+	if (!GetWorld() || IsAmmoEmpty())
+	{
+		StopFire();
+		return;
+	}
 
 	FVector TraceStart, TraceEnd;
-	if (!GetTraceData(TraceStart, TraceEnd)) return;
+	if (!GetTraceData(TraceStart, TraceEnd))
+	{
+		StopFire();
+		return;
+	}
 
 	FHitResult HitResult;
 	MakeHit(HitResult, TraceStart, TraceEnd);
@@ -42,11 +52,10 @@ void ASBRifleWeapon::MakeShot()
 	if (HitResult.bBlockingHit)
 	{
 		MakeDamage(HitResult);
-		
+
 		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0.0f,
-					  3.0f);
+		              3.0f);
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
-		
 	}
 	else
 	{
@@ -57,7 +66,7 @@ void ASBRifleWeapon::MakeShot()
 void ASBRifleWeapon::MakeDamage(FHitResult& HitResult)
 {
 	const auto DamagedActor = HitResult.GetActor();
-	if(!DamagedActor) return;
+	if (!DamagedActor) return;
 
 	DamagedActor->TakeDamage(DamageAmount, FDamageEvent{}, GetPlayerController(), this);
 }
