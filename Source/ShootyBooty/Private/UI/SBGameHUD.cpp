@@ -3,6 +3,7 @@
 
 #include "UI/SBGameHUD.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Engine/Canvas.h"
 #include "Engine/Canvas.h"
 
@@ -10,7 +11,18 @@ void ASBGameHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
-	DrawCrossHair();
+	//DrawCrossHair();
+}
+
+void ASBGameHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	auto PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(),PlayerHUDWidgetClass);
+	if(PlayerHUDWidget)
+	{
+		PlayerHUDWidget->AddToViewport();
+	}
 }
 
 void ASBGameHUD::DrawCrossHair()

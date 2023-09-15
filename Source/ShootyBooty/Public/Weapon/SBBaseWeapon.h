@@ -25,6 +25,19 @@ struct FAmmoData
 	bool bInfinite;
 };
 
+USTRUCT(BlueprintType)
+struct FWeaponUIData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="UI")
+	UTexture2D* MainIcon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="UI")
+	UTexture2D* CrossHairIcon;
+	
+};
+
 UCLASS(Abstract)
 class SHOOTYBOOTY_API ASBBaseWeapon : public AActor
 {
@@ -40,6 +53,8 @@ public:
 	void ChangeClip();
 	bool CanReload() const;
 
+	FWeaponUIData GetUIData() const {return UIData;}
+	FAmmoData GetAmmoData() const {return CurrentAmmo;}
 protected:
 	virtual void BeginPlay() override;
 
@@ -58,6 +73,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	FAmmoData DefaultAmmo{15, 10, false};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="UI")
+	FWeaponUIData UIData;
+	
 	virtual void MakeShot();
 
 	APlayerController* GetPlayerController() const;

@@ -16,6 +16,12 @@ class SHOOTYBOOTY_API ASBGameHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
+protected:
+
+	virtual void BeginPlay() override;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
 private:
 	void DrawCrossHair();
 };

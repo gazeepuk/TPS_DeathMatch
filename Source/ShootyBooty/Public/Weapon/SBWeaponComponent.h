@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SBBaseWeapon.h"
 #include "Components/ActorComponent.h"
 #include "SBWeaponComponent.generated.h"
 class ASBBaseWeapon;
@@ -31,6 +32,8 @@ public:
 	void StopFire();
 	void NextWeapon();
 	void Reload();
+	bool GetWeaponUIData(FWeaponUIData& UIData) const;
+	bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
 protected:
 	virtual void BeginPlay() override;
 

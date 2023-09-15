@@ -122,6 +122,26 @@ void USBWeaponComponent::Reload()
 	ChangeClip();
 }
 
+bool USBWeaponComponent::GetWeaponUIData(FWeaponUIData& UIData) const
+{
+	if(CurrentWeapon)
+	{
+		UIData = CurrentWeapon->GetUIData();
+		return true;
+	}
+	return false;
+}
+
+bool USBWeaponComponent::GetWeaponAmmoData(FAmmoData& AmmoData) const
+{
+	if(CurrentWeapon)
+	{
+		AmmoData = CurrentWeapon->GetAmmoData();
+		return true;
+	}
+	return false;
+}
+
 void USBWeaponComponent::PlayAnimMotage(UAnimMontage* Animation)
 {
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
