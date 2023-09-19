@@ -19,7 +19,8 @@ public class ShootyBooty : ModuleRules
 			"ShootyBooty/Public/Dev",
 			"ShootyBooty/Public/Weapon",
 			"ShootyBooty/Public/UI",
-			"ShootyBooty/Public/Animations"
+			"ShootyBooty/Public/Animations",
+			"ShootyBooty/Public/Pickups"
 		});
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
