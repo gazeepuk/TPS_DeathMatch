@@ -32,8 +32,12 @@ public:
 	void StopFire();
 	void NextWeapon();
 	void Reload();
+	
 	bool GetWeaponUIData(FWeaponUIData& UIData) const;
 	bool GetWeaponAmmoData(FAmmoData& AmmoData) const;
+	
+	bool TryToAddAmmo(TSubclassOf<ASBBaseWeapon> InWeaponType, int32 InClipsAmount);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -78,6 +82,6 @@ private:
 	bool CanEquip();
 	bool CanReload();
 
-	void OnEmptyClip();
+	void OnEmptyClip(ASBBaseWeapon* AmmoEmptyWeapon);
 	void ChangeClip();
 };

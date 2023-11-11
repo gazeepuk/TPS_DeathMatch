@@ -16,6 +16,36 @@ ASBBaseWeapon::ASBBaseWeapon()
 	SetRootComponent(WeaponMesh);
 }
 
+bool ASBBaseWeapon::TryToAddAmmo(int32 InClipsAmount)
+{
+	if (CurrentAmmo.bInfinite || IsAmmoFull() || InClipsAmount <= 0) return false;
+
+	if (IsAmmoEmpty())
+	{
+		CurrentAmmo.Clips = FMath::Clamp(InClipsAmount,0,DefaultAmmo.Clips + 1);
+		OnClipEmpty.Broadcast(this); 
+	}
+	else if(CurrentAmmo.Clips < DefaultAmmo.Clips)
+	{
+		const auto NextClipsAmount = CurrentAmmo.Clips + InClipsAmount;
+		if(DefaultAmmo.Clips - NextClipsAmount >= 0)
+		{
+			CurrentAmmo.Clips = NextClipsAmount;
+		}
+		else
+		{
+			CurrentAmmo.Clips = DefaultAmmo.Clips;
+			CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+		}
+		
+	}
+	else
+	{
+		CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+	}
+	return true;
+}
+
 void ASBBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -34,7 +64,7 @@ void ASBBaseWeapon::StopFire()
 
 void ASBBaseWeapon::MakeShot()
 {
-	if(!IsAmmoEmpty())
+	if (!IsAmmoEmpty())
 	{
 		DecreaseAmmo();
 	}
@@ -95,26 +125,33 @@ void ASBBaseWeapon::DecreaseAmmo()
 		UE_LOG(LogBaseWeapon, Error, TEXT("-------Clip is empty-------"));
 		return;
 	}
-	
+
 	CurrentAmmo.Bullets--;
 	LogAmmo();
 
 	if (IsClipEmpty() && !IsAmmoEmpty())
 	{
 		StopFire();
-		OnClipEmpty.Broadcast();
+		OnClipEmpty.Broadcast(this);
 	}
 }
 
 bool ASBBaseWeapon::IsAmmoEmpty() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Is Ammo Empty: %d"), !CurrentAmmo.bInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty())
+	UE_LOG(LogTemp, Warning, TEXT("Is Ammo Empty: %d"),
+	       !CurrentAmmo.bInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty())
 	return !CurrentAmmo.bInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty();
 }
 
 bool ASBBaseWeapon::IsClipEmpty() const
 {
 	return CurrentAmmo.Bullets == 0;
+}
+
+bool ASBBaseWeapon::IsAmmoFull() const
+{
+	return CurrentAmmo.Clips == DefaultAmmo.Clips &&
+		CurrentAmmo.Bullets == DefaultAmmo.Bullets;
 }
 
 void ASBBaseWeapon::ChangeClip()

@@ -35,7 +35,4 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="UI")
 	bool IsPlayerSpectating() const;
 
-private:
-	USBWeaponComponent* GetWeaponComponent() const;
-	USBHealthComponent* GetHealthComponent() const;
 };

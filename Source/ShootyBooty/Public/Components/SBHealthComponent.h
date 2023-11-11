@@ -30,7 +30,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void OnHealed();
+	
+	bool IsHealthFull() const {return FMath::IsNearlyEqual(CurrentHealth, MaxHealth);}
 
+	bool TryHeal(float HealAmount);
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin="0.0", ClampMax="1000"), Category="Health")

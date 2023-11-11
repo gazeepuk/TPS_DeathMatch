@@ -5,10 +5,8 @@
 #include "Components/SphereComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBasePickup, All, All);
-// Sets default values
 ASBBasePickup::ASBBasePickup()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
@@ -18,24 +16,54 @@ ASBBasePickup::ASBBasePickup()
 	SetRootComponent(CollisionComponent);
 }
 
-// Called when the game starts or when spawned
 void ASBBasePickup::BeginPlay()
 {
 	Super::BeginPlay();
+	check(CollisionComponent)
 }
 
 void ASBBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	UE_LOG(LogBasePickup, Display, TEXT("Pickup was taken"));
-	Destroy();
+	const auto Pawn = Cast<APawn>(OtherActor);
+	if(Pawn && GivePickupTo(Pawn))
+	{
+		OnPickupWasTaken();
+	}
 }
 
-// Called every frame
-void ASBBasePickup::Tick(float DeltaTime)
+bool ASBBasePickup::GivePickupTo(APawn* InPlayerPawn)
 {
-	Super::Tick(DeltaTime);
+	return false;
+}
 
+void ASBBasePickup::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	AddMovement();
+}
+
+void ASBBasePickup::OnPickupWasTaken()
+{
+	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	if(GetRootComponent())
+		GetRootComponent()->SetVisibility(false,true);
+	FTimerHandle RespawnTimerHandle;
+	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASBBasePickup::Respawn, RespawnTime);
+}
+
+void ASBBasePickup::Respawn()
+{
+	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
+	if(GetRootComponent())
+		GetRootComponent()->SetVisibility(true,true);
+}
+
+void ASBBasePickup::AddMovement()
+{
+	FVector3d Location(GetActorLocation());
+	SetActorLocation(FVector3d(Location.X, Location.Y,Location.Z + FMath::Sin(GetWorld()->TimeSeconds)*0.25));
+	AddActorLocalRotation(FRotator(0,0.75f,0));
 }
 

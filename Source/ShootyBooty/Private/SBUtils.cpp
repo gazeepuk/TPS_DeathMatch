@@ -1,0 +1,20 @@
+// ShootyBooty by @GazeePuk. All Rights Reversed
+
+
+#include "SBUtils.h"
+
+USBWeaponComponent* USBUtils::GetWeaponComponent(const APawn* InPlayerPawn)
+{
+	if(!InPlayerPawn) return nullptr;
+
+	const auto WeaponComponent = InPlayerPawn->GetComponentByClass<USBWeaponComponent>();
+	return WeaponComponent;
+}
+
+USBHealthComponent* USBUtils::GetHealthComponent(const APawn* InPlayerPawn)
+{
+	if(!InPlayerPawn) return nullptr;
+
+	const auto HealthComponent = InPlayerPawn->GetComponentByClass<USBHealthComponent>();
+	return HealthComponent;
+}

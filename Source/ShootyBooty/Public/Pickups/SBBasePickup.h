@@ -14,20 +14,22 @@ class SHOOTYBOOTY_API ASBBasePickup : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ASBBasePickup();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, Category="Pickups")
 	USphereComponent* CollisionComponent;
 
+    UPROPERTY(EditAnywhere, Category="Pickups")
+    float RespawnTime = 5.0f;
+    
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-	
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	virtual bool GivePickupTo(APawn* InPlayerPawn);
+private:	
+	virtual void Tick(float DeltaSeconds) override;
+	void OnPickupWasTaken();
+	void Respawn();
+	void AddMovement();
 };

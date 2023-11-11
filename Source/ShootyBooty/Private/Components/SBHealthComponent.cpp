@@ -22,6 +22,13 @@ void USBHealthComponent::OnHealed()
 }
 
 
+bool USBHealthComponent::TryHeal(float HealAmount)
+{
+	if(IsDead() || IsHealthFull()) return false;
+	SetHealth(HealAmount+CurrentHealth);
+	return true;
+}
+
 // Called when the game starts
 void USBHealthComponent::BeginPlay()
 {
