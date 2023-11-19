@@ -14,5 +14,5 @@ class SHOOTYBOOTY_API USBUtils : public UObject
 	
 public:
 	static USBWeaponComponent* GetWeaponComponent(const APawn* InPlayerPawn);
-	static USBHealthComponent* GetHealthComponent(const APawn* InPlayerPawn);
+	static USBHealthComponent* GetHealthComponent(const AActor* InPlayerPawn);
 };

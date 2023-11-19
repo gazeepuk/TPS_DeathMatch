@@ -22,13 +22,13 @@ bool ASBBaseWeapon::TryToAddAmmo(int32 InClipsAmount)
 
 	if (IsAmmoEmpty())
 	{
-		CurrentAmmo.Clips = FMath::Clamp(InClipsAmount,0,DefaultAmmo.Clips + 1);
-		OnClipEmpty.Broadcast(this); 
+		CurrentAmmo.Clips = FMath::Clamp(InClipsAmount, 0, DefaultAmmo.Clips + 1);
+		OnClipEmpty.Broadcast(this);
 	}
-	else if(CurrentAmmo.Clips < DefaultAmmo.Clips)
+	else if (CurrentAmmo.Clips < DefaultAmmo.Clips)
 	{
 		const auto NextClipsAmount = CurrentAmmo.Clips + InClipsAmount;
-		if(DefaultAmmo.Clips - NextClipsAmount >= 0)
+		if (DefaultAmmo.Clips - NextClipsAmount >= 0)
 		{
 			CurrentAmmo.Clips = NextClipsAmount;
 		}
@@ -37,7 +37,6 @@ bool ASBBaseWeapon::TryToAddAmmo(int32 InClipsAmount)
 			CurrentAmmo.Clips = DefaultAmmo.Clips;
 			CurrentAmmo.Bullets = DefaultAmmo.Bullets;
 		}
-		
 	}
 	else
 	{
@@ -83,11 +82,23 @@ APlayerController* ASBBaseWeapon::GetPlayerController() const
 
 bool ASBBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
 {
-	const auto Controller = GetPlayerController();
-	if (!Controller) return false;
+	const auto SBCharacter = Cast<ACharacter>(GetOwner());
+	if (!SBCharacter)return false;
 
-	Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
-	return true;
+	if (SBCharacter->IsPlayerControlled())
+	{
+		const auto Controller = GetPlayerController();
+		if (!Controller) return false;
+
+		Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+		return true;
+	}
+	else
+	{
+		ViewLocation = GetMuzzleWorldLocation();
+		ViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
+		return true;
+	}
 }
 
 FVector ASBBaseWeapon::GetMuzzleWorldLocation() const

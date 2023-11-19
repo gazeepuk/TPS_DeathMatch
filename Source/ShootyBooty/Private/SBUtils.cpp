@@ -11,7 +11,7 @@ USBWeaponComponent* USBUtils::GetWeaponComponent(const APawn* InPlayerPawn)
 	return WeaponComponent;
 }
 
-USBHealthComponent* USBUtils::GetHealthComponent(const APawn* InPlayerPawn)
+USBHealthComponent* USBUtils::GetHealthComponent(const AActor* InPlayerPawn)
 {
 	if(!InPlayerPawn) return nullptr;
 

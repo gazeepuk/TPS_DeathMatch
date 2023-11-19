@@ -28,9 +28,9 @@ class SHOOTYBOOTY_API USBWeaponComponent : public UActorComponent
 public:	
 	USBWeaponComponent();
 
-	void StartFire();
+	virtual void StartFire();
 	void StopFire();
-	void NextWeapon();
+	virtual void NextWeapon();
 	void Reload();
 	
 	bool GetWeaponUIData(FWeaponUIData& UIData) const;
@@ -54,7 +54,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Animation")
 	UAnimMontage* EquipAnimMontage;
 	
-private:
 
 	UPROPERTY()
 	ASBBaseWeapon* CurrentWeapon;
@@ -62,24 +61,26 @@ private:
 	UPROPERTY()
 	TArray<ASBBaseWeapon*> Weapons;
 
+	bool CanFire();
+	bool CanEquip();
+	
+	void EquipWeapon(int32 WeaponIndex);
+	int32 CurrentWeaponIndex = 0;
+private:
+
 	UPROPERTY()
 	UAnimMontage* CurrentReloadAnimMontage = nullptr;
 	
-	int32 CurrentWeaponIndex = 0;
 	bool bEquipAnimProgress = false;
 	bool bReloadAnimProgress = false;
 	
 	void SpawnWeapons();
 	void AttachWeaponToSocket(ASBBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
-	void EquipWeapon(int32 WeaponIndex);
 	void PlayAnimMotage(UAnimMontage* Animation);
 
 	void InitAnimations();
 	void OnEquipFinished(USkeletalMeshComponent* MeshComponent);
 	void OnReloadFinished(USkeletalMeshComponent* MeshComponent);
-
-	bool CanFire();
-	bool CanEquip();
 	bool CanReload();
 
 	void OnEmptyClip(ASBBaseWeapon* AmmoEmptyWeapon);

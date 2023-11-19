@@ -1,7 +1,7 @@
 // ShootyBooty by @GazeePuk. All Rights Reversed
 
 
-#include "Weapon/SBWeaponComponent.h"
+#include "SBWeaponComponent.h"
 
 #include "AnimUtils.h"
 #include "SBBaseWeapon.h"

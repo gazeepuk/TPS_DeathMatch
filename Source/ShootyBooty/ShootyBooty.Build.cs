@@ -8,7 +8,7 @@ public class ShootyBooty : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","GameplayTasks","NavigationSystem" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
@@ -20,7 +20,12 @@ public class ShootyBooty : ModuleRules
 			"ShootyBooty/Public/Weapon",
 			"ShootyBooty/Public/UI",
 			"ShootyBooty/Public/Animations",
-			"ShootyBooty/Public/Pickups"
+			"ShootyBooty/Public/Pickups" +
+			"ShootyBooty/Public/AI",
+			"ShootyBooty/Public/AI/Tasks",
+			"ShootyBooty/Public/AI/Services",
+			"ShootyBooty/Public/AI/EQS",
+			"ShootyBooty/Public/AI/Decorators"
 		});
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

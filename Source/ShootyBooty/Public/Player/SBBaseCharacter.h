@@ -20,7 +20,6 @@ class SHOOTYBOOTY_API ASBBaseCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ASBBaseCharacter(const FObjectInitializer& ObjInit);
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -52,6 +51,7 @@ protected:
 	bool bWantsToRun = false;
 	bool bMovingForward = false;
 
+	virtual void OnDeath();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -71,7 +71,6 @@ private:
 	void MoveRight(float Amount);
 	void OnStartRunning();
 	void OnStopRunning();
-	void OnDeath();
 	void OnHealthChanged(float Health);
 
 	UFUNCTION()

@@ -52,7 +52,8 @@ public:
 	virtual void StopFire();
 	void ChangeClip();
 	bool CanReload() const;
-
+	bool IsAmmoEmpty() const;
+	
 	FWeaponUIData GetUIData() const {return UIData;}
 	FAmmoData GetAmmoData() const {return CurrentAmmo;}
 
@@ -94,7 +95,7 @@ protected:
 	FTimerHandle ShotTimerHandle;
 
 	void DecreaseAmmo();
-	bool IsAmmoEmpty() const;
+
 	bool IsClipEmpty() const;
 	bool IsAmmoFull() const;
 	void LogAmmo();
