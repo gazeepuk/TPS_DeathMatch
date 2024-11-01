@@ -2,6 +2,7 @@
 .vs/
 .vsconfig
 .idea/*
+.user
 
 # Compiled Object files
 *.slo
