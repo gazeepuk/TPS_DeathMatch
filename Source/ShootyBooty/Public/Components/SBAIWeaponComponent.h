@@ -16,6 +16,6 @@ class SHOOTYBOOTY_API USBAIWeaponComponent : public USBWeaponComponent
 
 public:
 	virtual void StartFire() override;
-	virtual void NextWeapon() override;
+	virtual void TakeNextWeapon() override;
 };
  

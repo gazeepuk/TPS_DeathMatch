@@ -8,13 +8,14 @@ public class ShootyBooty : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","GameplayTasks","NavigationSystem" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "GameplayTasks", "NavigationSystem", "EnhancedInput" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[]
 		{
-			"ShootyBooty/Public/Player",
+			"ShootyBooty/Public",
+			"ShootyBooty/Public/Characters",
 			"ShootyBooty/Public/Components",
 			"ShootyBooty/Public/Dev",
 			"ShootyBooty/Public/Weapon",

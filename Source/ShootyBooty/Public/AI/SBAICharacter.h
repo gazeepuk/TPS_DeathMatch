@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Player/SBBaseCharacter.h"
+#include "SBBaseCharacter.h"
 #include "SBAICharacter.generated.h"
 
 class UBehaviorTree;

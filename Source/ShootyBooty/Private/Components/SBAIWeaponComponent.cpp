@@ -9,7 +9,7 @@ void USBAIWeaponComponent::StartFire()
 
 	if(CurrentWeapon->IsAmmoEmpty())
 	{
-		NextWeapon();
+		TakeNextWeapon();
 	}
 	else
 	{
@@ -17,7 +17,7 @@ void USBAIWeaponComponent::StartFire()
 	}
 }
 
-void USBAIWeaponComponent::NextWeapon()
+void USBAIWeaponComponent::TakeNextWeapon()
 {
 	if(!CanEquip()) return;
 	int32 NextIndex = (CurrentWeaponIndex + 1) % Weapons.Num();

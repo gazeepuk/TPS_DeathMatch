@@ -30,7 +30,7 @@ public:
 
 	virtual void StartFire();
 	void StopFire();
-	virtual void NextWeapon();
+	virtual void TakeNextWeapon();
 	void Reload();
 	
 	bool GetWeaponUIData(FWeaponUIData& UIData) const;

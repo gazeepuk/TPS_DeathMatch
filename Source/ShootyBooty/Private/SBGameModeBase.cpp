@@ -5,7 +5,7 @@
 
 #include "SBBaseCharacter.h"
 #include "SBGameHUD.h"
-#include"Player/SBPlayerController.h"
+#include "SBPlayerController.h"
 ASBGameModeBase::ASBGameModeBase()
 {
 	DefaultPawnClass = ASBBaseCharacter::StaticClass();

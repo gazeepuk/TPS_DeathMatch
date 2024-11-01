@@ -19,7 +19,7 @@ void USBChangeWeaponBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 		const auto WeaponComponent = Controller->GetPawn()->FindComponentByClass<USBWeaponComponent>();
 		if(WeaponComponent && Probability > 0 && FMath::FRand() <= Probability)
 		{
-			WeaponComponent->NextWeapon();
+			WeaponComponent->TakeNextWeapon();
 		}
 	}
 	

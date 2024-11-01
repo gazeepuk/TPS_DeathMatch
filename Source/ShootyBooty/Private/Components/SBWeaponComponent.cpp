@@ -38,7 +38,7 @@ void USBWeaponComponent::StopFire()
 	CurrentWeapon->StopFire();
 }
 
-void USBWeaponComponent::NextWeapon()
+void USBWeaponComponent::TakeNextWeapon()
 {
 	if (!CanEquip()) return;
 
