@@ -21,7 +21,7 @@ public class ShootyBooty : ModuleRules
 			"ShootyBooty/Public/Weapon",
 			"ShootyBooty/Public/UI",
 			"ShootyBooty/Public/Animations",
-			"ShootyBooty/Public/Pickups" +
+			"ShootyBooty/Public/Pickup",
 			"ShootyBooty/Public/AI",
 			"ShootyBooty/Public/AI/Tasks",
 			"ShootyBooty/Public/AI/Services",

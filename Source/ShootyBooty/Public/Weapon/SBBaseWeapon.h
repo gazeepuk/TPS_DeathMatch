@@ -13,7 +13,7 @@ class USkeletalMeshComponent;
 USTRUCT(BlueprintType)
 struct FAmmoData
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	int32 Bullets;
@@ -28,7 +28,7 @@ struct FAmmoData
 USTRUCT(BlueprintType)
 struct FWeaponUIData
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="UI")
 	UTexture2D* MainIcon;
