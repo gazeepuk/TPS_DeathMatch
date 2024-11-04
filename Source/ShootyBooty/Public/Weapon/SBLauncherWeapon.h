@@ -19,5 +19,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category="Weapon")
 	TSubclassOf<ASBProjectile> ProjectileClass;
 
-	virtual void MakeShot() override;
+	virtual void Server_MakeShot_Implementation() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_SpawnProjectile(TSubclassOf<ASBProjectile> InProjectileClass, const FTransform& InSpawnTransform, const FVector& InDirection);
 };

@@ -65,9 +65,9 @@ void ASBPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ThisClass::StartFireInput);
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &ThisClass::StopFireInput);
 		}
-		if(IsValid(TakeNextWeaponAction))
+		if(IsValid(EquipNextWeaponAction))
 		{
-			EnhancedInputComponent->BindAction(TakeNextWeaponAction, ETriggerEvent::Started, this, &ThisClass::TakeNextWeapon);
+			EnhancedInputComponent->BindAction(EquipNextWeaponAction, ETriggerEvent::Started, this, &ThisClass::EquipNextWeapon);
 		}
 		if(IsValid(ReloadAction))
 		{
@@ -131,32 +131,52 @@ void ASBPlayerCharacter::StopSprintInput(const FInputActionValue& Value)
 
 void ASBPlayerCharacter::StartFireInput(const FInputActionValue& Value)
 {
+	Server_StartFire();
+}
+
+void ASBPlayerCharacter::StopFireInput(const FInputActionValue& Value)
+{
+	Server_StopFire();
+}
+
+void ASBPlayerCharacter::EquipNextWeapon(const FInputActionValue& Value)
+{
+	Server_EquipNextWeapon();
+}
+
+void ASBPlayerCharacter::ReloadWeapon(const FInputActionValue& Value)
+{
+	Server_Reload();
+}
+
+void ASBPlayerCharacter::Server_EquipNextWeapon_Implementation()
+{
+	if(WeaponComponent)
+	{
+		WeaponComponent->EquipNextWeapon();
+	}
+}
+
+void ASBPlayerCharacter::Server_Reload_Implementation()
+{
+	if(WeaponComponent)
+	{
+		WeaponComponent->Reload();
+	}
+}
+
+void ASBPlayerCharacter::Server_StartFire_Implementation()
+{
 	if(WeaponComponent)
 	{
 		WeaponComponent->StartFire();
 	}
 }
 
-void ASBPlayerCharacter::StopFireInput(const FInputActionValue& Value)
+void ASBPlayerCharacter::Server_StopFire_Implementation()
 {
 	if(WeaponComponent)
 	{
 		WeaponComponent->StopFire();
-	}
-}
-
-void ASBPlayerCharacter::TakeNextWeapon(const FInputActionValue& Value)
-{
-	if(WeaponComponent)
-	{
-		WeaponComponent->TakeNextWeapon();
-	}
-}
-
-void ASBPlayerCharacter::ReloadWeapon(const FInputActionValue& Value)
-{
-	if(WeaponComponent)
-	{
-		WeaponComponent->Reload();
 	}
 }

@@ -6,6 +6,7 @@
 #include"GameFramework/Character.h"
 #include"GameFramework/Controller.h"
 #include "Engine/DamageEvents.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
@@ -14,6 +15,8 @@ ASBBaseWeapon::ASBBaseWeapon()
 	PrimaryActorTick.bCanEverTick = false;
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	SetRootComponent(WeaponMesh);
+
+	bReplicates = true;
 }
 
 bool ASBBaseWeapon::TryToAddAmmo(int32 InClipsAmount)
@@ -52,16 +55,23 @@ void ASBBaseWeapon::BeginPlay()
 	CurrentAmmo = DefaultAmmo;
 }
 
+void ASBBaseWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, CurrentAmmo);
+}
+
 void ASBBaseWeapon::StartFire()
 {
-	MakeShot();
+	Server_MakeShot();
 }
 
 void ASBBaseWeapon::StopFire()
 {
 }
 
-void ASBBaseWeapon::MakeShot()
+void ASBBaseWeapon::Server_MakeShot_Implementation()
 {
 	if (!IsAmmoEmpty())
 	{
@@ -114,18 +124,20 @@ bool ASBBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd)
 	if (!GetPlayerViewPoint(ViewLocation, ViewRotation)) return false;
 
 	TraceStart = ViewLocation;
-	const FVector ShootDirecrion = ViewRotation.Vector();
-	TraceEnd = TraceStart + ShootDirecrion * TraceMaxDistance;
+	const FVector ShootDirection = ViewRotation.Vector();
+	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
 	return true;
 }
 
 void ASBBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
 {
-	if (!GetWorld()) return;
+	if (!GetWorld())
+	{
+		return;
+	}
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(GetOwner());
-
-	HitResult;
+	
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, CollisionParams);
 }
 

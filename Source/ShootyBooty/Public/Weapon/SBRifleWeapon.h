@@ -26,8 +26,10 @@ protected:
 	double BulletSpreed = 1.5f;
 
 	virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) override;
-	virtual void MakeShot() override;
+	virtual void Server_MakeShot_Implementation() override;
 
 private:
-	void MakeDamage(FHitResult& HitResult);
+	UFUNCTION(Server, Reliable)
+	void Server_MakeDamage(const FHitResult& HitResult);
+	void MakeDamage(const FHitResult& HitResult);
 };

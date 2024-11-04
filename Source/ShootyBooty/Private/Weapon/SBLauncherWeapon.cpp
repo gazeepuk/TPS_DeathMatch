@@ -3,12 +3,11 @@
 
 #include "Weapon/SBLauncherWeapon.h"
 #include "Weapon/SBProjectile.h"
-#include "Kismet/GameplayStatics.h"
 
-void ASBLauncherWeapon::MakeShot()
+void ASBLauncherWeapon::Server_MakeShot_Implementation()
 {
 	
-	Super::MakeShot();
+	Super::Server_MakeShot_Implementation();
 	
 	if (!GetWorld() || IsAmmoEmpty())return;
 	
@@ -22,12 +21,18 @@ void ASBLauncherWeapon::MakeShot()
 	const FVector Direction = (EndPoint - GetMuzzleWorldLocation()).GetSafeNormal();
 	
 	const FTransform SpawnTransform(FRotator::ZeroRotator,GetMuzzleWorldLocation());
-	ASBProjectile* Projectile = GetWorld()->SpawnActorDeferred<ASBProjectile>(ProjectileClass, SpawnTransform);
+	NetMulticast_SpawnProjectile(ProjectileClass, SpawnTransform, Direction);
+}
 
+void ASBLauncherWeapon::NetMulticast_SpawnProjectile_Implementation(TSubclassOf<ASBProjectile> InProjectileClass,
+	const FTransform& InSpawnTransform, const FVector& InDirection)
+{
+	ASBProjectile* Projectile = GetWorld()->SpawnActorDeferred<ASBProjectile>(ProjectileClass, InSpawnTransform);
 	if(Projectile)
 	{
-		Projectile->SetShotDirection(Direction);
+		Projectile->SetShotDirection(InDirection);
 		Projectile->SetOwner(GetOwner());
-		Projectile->FinishSpawning(SpawnTransform);
+		Projectile->FinishSpawning(InSpawnTransform);
 	}
 }
+

@@ -8,6 +8,7 @@
 #include "SBEquipFinishAnimNotify.h"
 #include "SBReloadFinishedAnimNotify.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All)
 
@@ -20,55 +21,92 @@ void USBWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentWeaponIndex = 0;
-	SpawnWeapons();
-	EquipWeapon(CurrentWeaponIndex);
-	InitAnimations();
+	if(GetOwner()->HasAuthority())
+	{
+		CurrentWeaponIndex = 0;
+		Server_SpawnWeapons();
+		Server_EquipWeapon(CurrentWeaponIndex);
+		InitAnimations();
+	}
+}
+
+void USBWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, CurrentWeaponIndex);
+	DOREPLIFETIME(ThisClass, CurrentWeapon);
+	DOREPLIFETIME(ThisClass, Weapons);
 }
 
 void USBWeaponComponent::StartFire()
 {
-	if (!CanFire()) return;
+	if (!CanFire())
+	{
+		return;
+	}
 	CurrentWeapon->StartFire();
 }
 
-void USBWeaponComponent::StopFire()
+void USBWeaponComponent::StopFire() const
 {
-	if (!CurrentWeapon) return;
+	if (!CurrentWeapon)
+	{
+		return;
+	}
 	CurrentWeapon->StopFire();
 }
 
-void USBWeaponComponent::TakeNextWeapon()
+void USBWeaponComponent::EquipNextWeapon()
 {
 	if (!CanEquip()) return;
 
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
-	EquipWeapon(CurrentWeaponIndex);
+	Server_EquipWeapon(CurrentWeaponIndex);
 }
 
-void USBWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void USBWeaponComponent::Server_EndPlay_Implementation()
 {
 	CurrentWeapon = nullptr;
-	for (auto Weapon : Weapons)
+	for (ASBBaseWeapon* Weapon : Weapons)
 	{
 		Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		Weapon->Destroy();
 	}
 	Weapons.Empty();
+}
+
+void USBWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Server_EndPlay();
 
 	Super::EndPlay(EndPlayReason);
 }
 
 
+void USBWeaponComponent::Server_SpawnWeapons_Implementation()
+{
+	SpawnWeapons();
+}
+
+
 void USBWeaponComponent::SpawnWeapons()
 {
+	if(!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+	
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
 	if (!Character || !GetWorld()) return;
 
-	for (auto WeaponDatum : WeaponData)
+	for (const FWeaponData& WeaponDatum : WeaponData)
 	{
-		auto Weapon = GetWorld()->SpawnActor<ASBBaseWeapon>(WeaponDatum.WeaponClass);
-		if (!Weapon) continue;
+		ASBBaseWeapon* Weapon = GetWorld()->SpawnActor<ASBBaseWeapon>(WeaponDatum.WeaponClass);
+		if (!Weapon)
+		{
+			continue;
+		}
 
 		Weapon->OnClipEmpty.AddUObject(this, &USBWeaponComponent::OnEmptyClip);
 		Weapon->SetOwner(Character);
@@ -86,6 +124,11 @@ void USBWeaponComponent::AttachWeaponToSocket(ASBBaseWeapon* Weapon, USceneCompo
 	Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
 }
 
+void USBWeaponComponent::Server_EquipWeapon_Implementation(int32 WeaponIndex)
+{
+	EquipWeapon(WeaponIndex);
+}
+
 void USBWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
 	if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
@@ -93,9 +136,16 @@ void USBWeaponComponent::EquipWeapon(int32 WeaponIndex)
 		UE_LOG(LogWeaponComponent, Error, TEXT("Invalid Weapon Index"));
 		return;
 	}
-	if (Weapons.Num() <= 0) return;
+	if (Weapons.Num() <= 0)
+	{
+		return;
+	}
+	
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (!Character) return;
+	if (!Character)
+	{
+		return;
+	}
 
 	if (CurrentWeapon)
 	{
@@ -114,7 +164,7 @@ void USBWeaponComponent::EquipWeapon(int32 WeaponIndex)
 
 	AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
 	bEquipAnimProgress = true;
-	PlayAnimMotage(EquipAnimMontage);
+	Server_PlayAnimMontage(EquipAnimMontage, 1.f);
 }
 
 void USBWeaponComponent::Reload()
@@ -151,28 +201,43 @@ bool USBWeaponComponent::TryToAddAmmo(TSubclassOf<ASBBaseWeapon> InWeaponType, i
 	}
 	return false;
 }
+void USBWeaponComponent::Server_PlayAnimMontage_Implementation(UAnimMontage* Animation, float PlayRate)
+{
+	NetMulticast_PlayAnimMontage(Animation, PlayRate);
+}
 
-void USBWeaponComponent::PlayAnimMotage(UAnimMontage* Animation)
+void USBWeaponComponent::NetMulticast_PlayAnimMontage_Implementation(UAnimMontage* Animation, float PlayRate)
+{
+	PlayAnimMontage(Animation, PlayRate);
+}
+
+void USBWeaponComponent::PlayAnimMontage(UAnimMontage* Animation, float PlayRate) const
 {
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (!Character) return;
+	if (!Character)
+	{
+		return;
+	}
 
 	Character->PlayAnimMontage(Animation);
 }
 
 void USBWeaponComponent::InitAnimations()
 {
-	auto EquipFinishedNotify = AnimUtils::FindNotifyByClass<USBEquipFinishAnimNotify>(EquipAnimMontage);
+	USBEquipFinishAnimNotify* EquipFinishedNotify = AnimUtils::FindNotifyByClass<USBEquipFinishAnimNotify>(
+		EquipAnimMontage);
 	if (EquipFinishedNotify)
 	{
 		EquipFinishedNotify->OnNotified.AddUObject(this, &USBWeaponComponent::OnEquipFinished);
 	}
 
-	for (auto WeaponDatum : WeaponData)
+	for (const FWeaponData& WeaponDatum : WeaponData)
 	{
-		auto ReloadFinishedNotify = AnimUtils::FindNotifyByClass<USBReloadFinishedAnimNotify>(WeaponDatum.ReloadAnimMontage);
-		if (!ReloadFinishedNotify) continue;
-		
+		USBReloadFinishedAnimNotify* ReloadFinishedNotify = AnimUtils::FindNotifyByClass<USBReloadFinishedAnimNotify>(WeaponDatum.ReloadAnimMontage);
+		if (!ReloadFinishedNotify)
+		{
+			continue;
+		}
 		ReloadFinishedNotify->OnNotified.AddUObject(this, &USBWeaponComponent::OnReloadFinished);
 	}
 }
@@ -197,7 +262,7 @@ void USBWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
 	bReloadAnimProgress = false;
 }
 
-bool USBWeaponComponent::CanReload()
+bool USBWeaponComponent::CanReload() const
 {
 	return CurrentWeapon && !bEquipAnimProgress && !bReloadAnimProgress && CurrentWeapon->CanReload();
 }
@@ -228,15 +293,15 @@ void USBWeaponComponent::ChangeClip()
 	CurrentWeapon->StopFire();
 	CurrentWeapon->ChangeClip();
 	bReloadAnimProgress = true;
-	PlayAnimMotage(CurrentReloadAnimMontage);
+	Server_PlayAnimMontage(CurrentReloadAnimMontage, 1.f);
 }
 
-bool USBWeaponComponent::CanFire()
+bool USBWeaponComponent::CanFire() const
 {
 	return CurrentWeapon && !bEquipAnimProgress && !bReloadAnimProgress;
 }
 
-bool USBWeaponComponent::CanEquip()
+bool USBWeaponComponent::CanEquip() const
 {
 	return !bEquipAnimProgress && !bReloadAnimProgress;
 }

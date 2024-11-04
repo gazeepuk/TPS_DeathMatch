@@ -21,18 +21,21 @@ bool ASBRifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd)
 	FVector ViewLocation;
 	FRotator ViewRotation;
 
-	if (!GetPlayerViewPoint(ViewLocation, ViewRotation)) return false;
+	if (!GetPlayerViewPoint(ViewLocation, ViewRotation))
+	{
+		return false;
+	}
 
 	TraceStart = ViewLocation;
 	float HalfRad = FMath::DegreesToRadians(BulletSpreed);
-	const FVector ShootDirecrion = FMath::VRandCone(ViewRotation.Vector(), HalfRad);
-	TraceEnd = TraceStart + ShootDirecrion * TraceMaxDistance;
+	const FVector ShootDirection = FMath::VRandCone(ViewRotation.Vector(), HalfRad);
+	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
 	return true;
 }
 
-void ASBRifleWeapon::MakeShot()
+void ASBRifleWeapon::Server_MakeShot_Implementation()
 {
-	Super::MakeShot();
+	Super::Server_MakeShot_Implementation();
 	if (!GetWorld() || IsAmmoEmpty())
 	{
 		StopFire();
@@ -51,7 +54,7 @@ void ASBRifleWeapon::MakeShot()
 
 	if (HitResult.bBlockingHit)
 	{
-		MakeDamage(HitResult);
+		Server_MakeDamage(HitResult);
 
 		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0.0f,
 		              3.0f);
@@ -63,9 +66,14 @@ void ASBRifleWeapon::MakeShot()
 	}
 }
 
-void ASBRifleWeapon::MakeDamage(FHitResult& HitResult)
+void ASBRifleWeapon::Server_MakeDamage_Implementation(const FHitResult& HitResult)
 {
-	const auto DamagedActor = HitResult.GetActor();
+	MakeDamage(HitResult);
+}
+
+void ASBRifleWeapon::MakeDamage(const FHitResult& HitResult)
+{
+	AActor* DamagedActor = HitResult.GetActor();
 	if (!DamagedActor) return;
 
 	DamagedActor->TakeDamage(DamageAmount, FDamageEvent{}, GetPlayerController(), this);

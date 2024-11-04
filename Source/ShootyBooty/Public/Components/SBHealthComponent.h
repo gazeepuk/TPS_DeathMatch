@@ -34,8 +34,11 @@ public:
 	bool IsHealthFull() const {return FMath::IsNearlyEqual(CurrentHealth, MaxHealth);}
 
 	bool TryHeal(float HealAmount);
+	
 protected:
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin="0.0", ClampMax="1000"), Category="Health")
 	float MaxHealth = 100.0f;
 
@@ -54,6 +57,11 @@ private:
 	UFUNCTION()
 	void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatedBy, AActor* DamageCauser);
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth = 0.0f;
+	UFUNCTION()
+	void OnRep_CurrentHealth(float OldCurrentHealth) const;
+	
 	void SetHealth(float NewHealth);
 };

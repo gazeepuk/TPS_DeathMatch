@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "SBBaseCharacter.h"
 #include "SBPlayerCharacter.generated.h"
 
@@ -46,7 +47,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input|InputAction|Combat")
 	TObjectPtr<UInputAction> FireAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input|InputAction|Combat")
-	TObjectPtr<UInputAction> TakeNextWeaponAction;
+	TObjectPtr<UInputAction> EquipNextWeaponAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Input|InputAction|Combat")
 	TObjectPtr<UInputAction> ReloadAction;
 	
@@ -58,9 +59,19 @@ private:
 	virtual void StopSprintInput(const FInputActionValue& Value);
 	virtual void StartFireInput(const FInputActionValue& Value);
 	virtual void StopFireInput(const FInputActionValue& Value);
-	virtual void TakeNextWeapon(const FInputActionValue& Value);
+	virtual void EquipNextWeapon(const FInputActionValue& Value);
 	virtual void ReloadWeapon(const FInputActionValue& Value);
-	
+
+	// ~Combat
+private:
+	UFUNCTION(Server,Reliable)
+	void Server_EquipNextWeapon();
+	UFUNCTION(Server, Reliable)
+	void Server_Reload();
+	UFUNCTION(Server, Reliable)
+	void Server_StartFire();
+	UFUNCTION(Server, Reliable)
+	void Server_StopFire();
 };
 
 

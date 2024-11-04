@@ -3,6 +3,7 @@
 
 #include "Components/SBHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
 
@@ -33,38 +34,67 @@ bool USBHealthComponent::TryHeal(float HealAmount)
 void USBHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	check(MaxHealth > 0);
-	
-	SetHealth(MaxHealth);
-	AActor* ComponentOwner = GetOwner();
-	if (ComponentOwner)
+
+	//Set default health and assign to OnTakeAnyDamage owner's delegate on the Server
+	if(GetOwner()->HasAuthority())
 	{
-		ComponentOwner->OnTakeAnyDamage.AddDynamic(this, &USBHealthComponent::OnTakeAnyDamage);
+		check(MaxHealth > 0);
+
+		SetHealth(MaxHealth);
+		
+		AActor* ComponentOwner = GetOwner();
+		if (ComponentOwner)
+		{
+			ComponentOwner->OnTakeAnyDamage.AddDynamic(this, &USBHealthComponent::OnTakeAnyDamage);
+		}
 	}
 }
 
+void USBHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, CurrentHealth);
+}
+
+//Runs on the Server
 void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
                                          AController* InstigatedBy, AActor* DamageCauser)
 {
 	GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
 
-	if (Damage <= 0 || IsDead() || !GetWorld()) return;
+	if (Damage <= 0 || IsDead() || !GetWorld())
+	{
+		return;
+	}
 
-	SetHealth(CurrentHealth-Damage);
+	SetHealth(CurrentHealth - Damage);
 
 	if (IsDead())
 	{
 		OnDeath.Broadcast();
 	}
+	
 	else if (bAutoHeal)
 	{
-		GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &USBHealthComponent::OnHealed,
-		                                       HealthUpdateTime, true, HealthDelay);
+		GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &USBHealthComponent::OnHealed,HealthUpdateTime, true, HealthDelay);
 	}
 }
 
-void USBHealthComponent::SetHealth(float NewHealth)
+
+void USBHealthComponent::SetHealth(const float NewHealth)
 {
 	CurrentHealth = FMath::Clamp(NewHealth,0.0f,MaxHealth);
+	OnHealthChanged.Broadcast(CurrentHealth);
+}
+
+void USBHealthComponent::OnRep_CurrentHealth(float OldCurrentHealth) const
+{
+	if (IsDead() || !GetWorld())
+	{
+		return;
+	}
+
+	//Broadcast health delegates to a client 
 	OnHealthChanged.Broadcast(CurrentHealth);
 }

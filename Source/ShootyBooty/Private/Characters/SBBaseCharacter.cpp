@@ -18,12 +18,18 @@ ASBBaseCharacter::ASBBaseCharacter(const FObjectInitializer& ObjInit)
 	PrimaryActorTick.bCanEverTick = false;
 
 	HealthComponent = CreateDefaultSubobject<USBHealthComponent>("HealthComponent");
+	HealthComponent->SetIsReplicated(true);
 
 	HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("TextRenderComponent");
 	HealthTextComponent->SetupAttachment(GetRootComponent());
 	HealthTextComponent->SetOwnerNoSee(true);
 
 	WeaponComponent = CreateDefaultSubobject<USBWeaponComponent>("WeaponComponent");
+	WeaponComponent->SetIsReplicated(true);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 }
 
 // Called when the game starts or when spawned
@@ -57,25 +63,38 @@ float ASBBaseCharacter::GetMoveDirection() const
 	return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
 }
 
+//Plays animation montages on Server and Clients
+void ASBBaseCharacter::NetMulticast_PlayAnimMontage_Implementation(UAnimMontage* AnimMontage, const float PlayRate)
+{
+	PlayAnimMontage(AnimMontage, PlayRate);
+}
 
+//Run on Server
 void ASBBaseCharacter::OnDeath()
 {
 	UE_LOG(LogBaseCharacterLog, Error, TEXT("Player %s is dead"),*GetName())
 
-	PlayAnimMontage(DeathAnimMontage);
+	NetMulticast_PlayAnimMontage(DeathAnimMontage);
 	GetCharacterMovement()->DisableMovement();
 
 	SetLifeSpan(5.0f);
+	
+	NetMulticast_OnDeath();
+}
 
+//Runs on Server and Clients
+void ASBBaseCharacter::NetMulticast_OnDeath_Implementation()
+{
 	if(Controller)
 	{
 		Controller->ChangeState(NAME_Spectating);
 	}
+	
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 	WeaponComponent->StopFire();
 }
 
-void ASBBaseCharacter::OnHealthChanged(float Health)
+void ASBBaseCharacter::OnHealthChanged(const float Health) const
 {
 	HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 }
@@ -83,17 +102,21 @@ void ASBBaseCharacter::OnHealthChanged(float Health)
 
 void ASBBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {
-	const auto FallVelocityZ = GetCharacterMovement()->Velocity.Z * -1;
-	UE_LOG(LogBaseCharacterLog, Warning, TEXT("Landed. Velocity Z: %f"),FallVelocityZ)
-
-	if(FallVelocityZ<LandedDamageVelocity.X)
+	if(HasAuthority())
 	{
-		return;
-	}
+		const float FallVelocityZ = GetCharacterMovement()->Velocity.Z * -1;
+		UE_LOG(LogBaseCharacterLog, Warning, TEXT("Landed. Velocity Z: %f"),FallVelocityZ)
 
-	const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity,LandedDamage,FallVelocityZ);
-	UE_LOG(LogBaseCharacterLog, Warning, TEXT("FinalDamage: %f"),FinalDamage)
-	TakeDamage(FinalDamage, FDamageEvent{},nullptr, nullptr);
+		if(FallVelocityZ < LandedDamageVelocity.X)
+		{
+			return;
+		}
+
+		const float FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity,LandedDamage,FallVelocityZ);
+		UE_LOG(LogBaseCharacterLog, Warning, TEXT("FinalDamage: %f"),FinalDamage)
+
+		TakeDamage(FinalDamage, FDamageEvent{},nullptr, nullptr);
+	}
 }
 
 

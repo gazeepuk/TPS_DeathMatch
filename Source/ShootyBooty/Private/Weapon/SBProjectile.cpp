@@ -31,8 +31,12 @@ void ASBProjectile::BeginPlay()
 
 	MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
 	CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
-	CollisionComponent->OnComponentHit.AddDynamic(this, &ASBProjectile::OnProjectileHit);
-	SetLifeSpan(LifeSeconds);
+
+	if(HasAuthority())
+	{
+		CollisionComponent->OnComponentHit.AddDynamic(this, &ASBProjectile::OnProjectileHit);
+		SetLifeSpan(LifeSeconds);
+	}
 }
 
 void ASBProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

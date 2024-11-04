@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "SBBaseCharacter.generated.h"
 
@@ -37,10 +36,12 @@ protected:
 	TObjectPtr<UAnimMontage> DeathAnimMontage;
 
 	virtual void OnDeath();
-
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_OnDeath();
+	
 private:
 	UFUNCTION()
-	void OnHealthChanged(float Health);
+	void OnHealthChanged(float Health) const;
 
 	//Land damage
 protected:
@@ -69,4 +70,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	float GetMoveDirection() const;
+
+	//Animations
+public:
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticast_PlayAnimMontage(UAnimMontage* AnimMontage, float PlayRate = 1.f);
 };

@@ -23,6 +23,19 @@ struct FAmmoData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	bool bInfinite;
+
+	FAmmoData()
+		: Bullets(0)
+		, Clips(0)
+		, bInfinite(false)
+	{}
+
+	FAmmoData(int32 InBullets, int32 InClips, bool IsInfinity)
+		: Bullets(InBullets)
+		, Clips(InClips)
+		, bInfinite(IsInfinity)
+	{}
+	
 };
 
 USTRUCT(BlueprintType)
@@ -35,7 +48,6 @@ struct FWeaponUIData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="UI")
 	UTexture2D* CrossHairIcon;
-	
 };
 
 UCLASS(Abstract)
@@ -61,7 +73,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* WeaponMesh;
 
@@ -79,8 +92,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="UI")
 	FWeaponUIData UIData;
-	
-	virtual void MakeShot();
+
+	UFUNCTION(Server,Reliable)
+	virtual void Server_MakeShot();
 
 	APlayerController* GetPlayerController() const;
 
@@ -101,5 +115,6 @@ protected:
 	void LogAmmo();
 
 private:
+	UPROPERTY(Replicated)
 	FAmmoData CurrentAmmo;
 };
