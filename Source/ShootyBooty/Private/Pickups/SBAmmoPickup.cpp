@@ -9,10 +9,16 @@
 bool ASBAmmoPickup::GivePickupTo(APawn* InPlayerPawn)
 {
 	const auto HealthComponent = USBUtils::GetHealthComponent(InPlayerPawn);
-	if(!HealthComponent || HealthComponent->IsDead()) return false;
+	if(!HealthComponent || HealthComponent->IsDead())
+	{
+		return false;
+	}
 
-	const auto WeaponComponent = USBUtils::GetWeaponComponent(InPlayerPawn);
-	if(!WeaponComponent) return false;
+	USBWeaponComponent* WeaponComponent = USBUtils::GetWeaponComponent(InPlayerPawn);
+	if(!WeaponComponent)
+	{
+		return false;
+	}
 	
 	return WeaponComponent->TryToAddAmmo(WeaponType, ClipsAmount);
 }

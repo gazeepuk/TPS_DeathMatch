@@ -29,7 +29,13 @@ protected:
 	virtual bool GivePickupTo(APawn* InPlayerPawn);
 private:	
 	virtual void Tick(float DeltaSeconds) override;
-	void OnPickupWasTaken();
-	void Respawn();
+	UFUNCTION(Server,Reliable)
+	void Server_OnPickupWasTaken();
+	UFUNCTION(Server,Reliable)
+	void Server_Respawn() const;
+	UFUNCTION(Client, Reliable)
+	void Client_SetVisibility(bool bVisible, bool bPropagateToChildren) const;
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_SetVisibility(bool bVisible, bool bPropagateToChildren) const;
 	void AddMovement();
 };

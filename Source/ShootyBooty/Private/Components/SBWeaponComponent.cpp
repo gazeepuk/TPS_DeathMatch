@@ -194,10 +194,12 @@ bool USBWeaponComponent::GetWeaponAmmoData(FAmmoData& AmmoData) const
 
 bool USBWeaponComponent::TryToAddAmmo(TSubclassOf<ASBBaseWeapon> InWeaponType, int32 InClipsAmount)
 {
-	for (auto Weapon : Weapons)
+	for (ASBBaseWeapon* Weapon : Weapons)
 	{
 		if(Weapon && Weapon->IsA(InWeaponType))
+		{
 			return Weapon->TryToAddAmmo(InClipsAmount);
+		}
 	}
 	return false;
 }

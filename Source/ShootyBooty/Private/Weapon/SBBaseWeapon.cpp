@@ -21,16 +21,20 @@ ASBBaseWeapon::ASBBaseWeapon()
 
 bool ASBBaseWeapon::TryToAddAmmo(int32 InClipsAmount)
 {
-	if (CurrentAmmo.bInfinite || IsAmmoFull() || InClipsAmount <= 0) return false;
+	if (CurrentAmmo.bInfinite || IsAmmoFull() || InClipsAmount <= 0)
+	{
+		return false;
+	}
 
 	if (IsAmmoEmpty())
 	{
 		CurrentAmmo.Clips = FMath::Clamp(InClipsAmount, 0, DefaultAmmo.Clips + 1);
 		OnClipEmpty.Broadcast(this);
 	}
+	
 	else if (CurrentAmmo.Clips < DefaultAmmo.Clips)
 	{
-		const auto NextClipsAmount = CurrentAmmo.Clips + InClipsAmount;
+		const int32 NextClipsAmount = CurrentAmmo.Clips + InClipsAmount;
 		if (DefaultAmmo.Clips - NextClipsAmount >= 0)
 		{
 			CurrentAmmo.Clips = NextClipsAmount;

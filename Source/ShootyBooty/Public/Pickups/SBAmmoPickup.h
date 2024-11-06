@@ -21,5 +21,5 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Pickup")
 	TSubclassOf<ASBBaseWeapon> WeaponType;
-	virtual auto GivePickupTo(APawn* InPlayerPawn) -> bool override;
+	virtual bool GivePickupTo(APawn* InPlayerPawn)  override;
 };

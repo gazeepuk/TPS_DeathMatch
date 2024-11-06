@@ -14,22 +14,32 @@ ASBBasePickup::ASBBasePickup()
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 	SetRootComponent(CollisionComponent);
+
+	bReplicates = true;
 }
 
 void ASBBasePickup::BeginPlay()
 {
 	Super::BeginPlay();
 	check(CollisionComponent)
+	// Disable collision on clients
+	if(!HasAuthority())
+	{
+		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	}
 }
 
 void ASBBasePickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	const auto Pawn = Cast<APawn>(OtherActor);
-	if(Pawn && GivePickupTo(Pawn))
+	if(HasAuthority())
 	{
-		OnPickupWasTaken();
+		APawn* Pawn = Cast<APawn>(OtherActor);
+		if(Pawn && GivePickupTo(Pawn))
+		{
+			Server_OnPickupWasTaken();
+		}
 	}
 }
 
@@ -44,20 +54,34 @@ void ASBBasePickup::Tick(float DeltaSeconds)
 	AddMovement();
 }
 
-void ASBBasePickup::OnPickupWasTaken()
+void ASBBasePickup::Server_OnPickupWasTaken_Implementation()
 {
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	if(GetRootComponent())
-		GetRootComponent()->SetVisibility(false,true);
+	NetMulticast_SetVisibility(false, true);
 	FTimerHandle RespawnTimerHandle;
-	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASBBasePickup::Respawn, RespawnTime);
+	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASBBasePickup::Server_Respawn, RespawnTime);
 }
 
-void ASBBasePickup::Respawn()
+void ASBBasePickup::Server_Respawn_Implementation() const
 {
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
+	NetMulticast_SetVisibility(true, true);
+}
+
+void ASBBasePickup::Client_SetVisibility_Implementation(const bool bVisible, const bool bPropagateToChildren) const
+{
 	if(GetRootComponent())
-		GetRootComponent()->SetVisibility(true,true);
+	{
+		GetRootComponent()->SetVisibility(bVisible, bPropagateToChildren);
+	}
+}
+
+void ASBBasePickup::NetMulticast_SetVisibility_Implementation(bool bVisible, bool bPropagateToChildren) const
+{
+	if(GetRootComponent())
+	{
+		GetRootComponent()->SetVisibility(bVisible, bPropagateToChildren);
+	}
 }
 
 void ASBBasePickup::AddMovement()
