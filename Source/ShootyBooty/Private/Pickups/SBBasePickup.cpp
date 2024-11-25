@@ -68,13 +68,6 @@ void ASBBasePickup::Server_Respawn_Implementation() const
 	NetMulticast_SetVisibility(true, true);
 }
 
-void ASBBasePickup::Client_SetVisibility_Implementation(const bool bVisible, const bool bPropagateToChildren) const
-{
-	if(GetRootComponent())
-	{
-		GetRootComponent()->SetVisibility(bVisible, bPropagateToChildren);
-	}
-}
 
 void ASBBasePickup::NetMulticast_SetVisibility_Implementation(bool bVisible, bool bPropagateToChildren) const
 {

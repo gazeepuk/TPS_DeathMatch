@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "SBGameHUD.generated.h"
 
+class USBPlayerHUDWidget;
 /**
  * 
  */
@@ -14,14 +15,12 @@ class SHOOTYBOOTY_API ASBGameHUD : public AHUD
 {
 	GENERATED_BODY()
 public:
-	virtual void DrawHUD() override;
+	TObjectPtr<USBPlayerHUDWidget> PlayerHUDWidget;
 
+	void AddHUDWidget();
 protected:
-
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
-private:
-	void DrawCrossHair();
 };

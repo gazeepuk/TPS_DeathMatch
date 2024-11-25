@@ -11,6 +11,7 @@
  * 
  */
 
+class UTextBlock;
 class USBWeaponComponent;
 class USBHealthComponent;
 
@@ -35,4 +36,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="UI")
 	bool IsPlayerSpectating() const;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> MatchCountdownTextBlock;
 };

@@ -31,7 +31,6 @@ protected:
 
 	// ~Input
 private:
-
 	//Mapping Context
 	UPROPERTY(EditDefaultsOnly, Category = "Input|InputAction")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
