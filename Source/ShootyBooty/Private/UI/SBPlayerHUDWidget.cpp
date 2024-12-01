@@ -6,6 +6,7 @@
 #include "SBHealthComponent.h"
 #include "SBUtils.h"
 #include "SBWeaponComponent.h"
+#include "Components/TextBlock.h"
 
 float USBPlayerHUDWidget::GetHealthPercent() const
 {
@@ -42,4 +43,18 @@ bool USBPlayerHUDWidget::IsPlayerSpectating() const
 {
 	const auto Controller = GetOwningPlayer();
 	return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
+void USBPlayerHUDWidget::SetCountdownText(float CountdownTime) const
+{
+	CountdownTime = FMath::Max(CountdownTime, 0.f);
+	int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
+	int32 Seconds = CountdownTime - Minutes * 60;
+	FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+	MatchCountdownTextBlock->SetText(FText::FromString(CountdownText));
+}
+
+void USBPlayerHUDWidget::SetCountdownText(const FText& CountdownText) const
+{
+	MatchCountdownTextBlock->SetText(CountdownText);
 }

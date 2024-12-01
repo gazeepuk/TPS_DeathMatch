@@ -36,6 +36,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="UI")
 	bool IsPlayerSpectating() const;
 
+	void SetCountdownText(float CountdownTime) const;
+	void SetCountdownText(const FText& CountdownText) const;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTopScoringPlayersSet(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayers);
+private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> MatchCountdownTextBlock;
 };

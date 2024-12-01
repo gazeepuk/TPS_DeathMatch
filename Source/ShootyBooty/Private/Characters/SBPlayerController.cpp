@@ -3,11 +3,13 @@
 
 #include "SBPlayerController.h"
 
+#include "AnnouncementWidget.h"
 #include "EnhancedInputSubsystems.h"
 #include "SBGameHUD.h"
 #include "SBPlayerHUDWidget.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/GameMode.h"
+#include "GameModes/DeathMatchGameMode.h"
 #include "Net/UnrealNetwork.h"
 
 ASBPlayerController::ASBPlayerController()
@@ -18,21 +20,58 @@ ASBPlayerController::ASBPlayerController()
 void ASBPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	if (Subsystem)
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-	
+
 	SBGameHUD = GetHUD<ASBGameHUD>();
+	Server_CheckMatchState();
 }
 
 void ASBPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ASBPlayerController, MatchState); 
+	DOREPLIFETIME(ASBPlayerController, MatchState);
+	DOREPLIFETIME(ASBPlayerController, TopScoringPlayerStates);
+}
+
+void ASBPlayerController::Server_CheckMatchState_Implementation()
+{
+	const ADeathMatchGameMode* DeathMatchGameMode = GetWorld()->GetAuthGameMode<ADeathMatchGameMode>();
+	if(DeathMatchGameMode)
+	{
+		WarmupTime = DeathMatchGameMode->GetWarmupTime();
+		MatchTime = DeathMatchGameMode->GetMatchTime();
+		CooldownTime = DeathMatchGameMode->GetCooldownTime();
+		LevelStartingTime = DeathMatchGameMode->GetLevelStartingTime();
+		MatchState = DeathMatchGameMode->GetMatchState();
+		Client_JoinMidgame(MatchState, WarmupTime, CooldownTime, MatchTime, LevelStartingTime);
+
+		if(SBGameHUD && MatchState == MatchState::WaitingToStart && IsLocalController())
+		{
+			SBGameHUD->AddAnnouncementWidget();
+		}
+	}
+}
+
+void ASBPlayerController::Client_JoinMidgame_Implementation(FName InMatchState, float InWarmupTime, float InCooldownTime,
+                                                            float InMatchTime, float InLevelStartingTime)
+{
+	MatchState = InMatchState;
+	WarmupTime = InWarmupTime;
+	MatchTime = InMatchTime;
+	CooldownTime = InCooldownTime;
+	LevelStartingTime = InLevelStartingTime;
+	OnMatchStateSet(MatchState);
+	
+	if(SBGameHUD && MatchState == MatchState::WaitingToStart)
+	{
+		SBGameHUD->AddAnnouncementWidget();
+	}
 }
 
 void ASBPlayerController::Tick(float DeltaSeconds)
@@ -57,11 +96,33 @@ void ASBPlayerController::CheckTimeSynced(float DeltaSeconds)
 
 void ASBPlayerController::SetHUDTime()
 {
-	uint32 SecondLeft = FMath::CeilToInt(MatchTime - GetServerTime());
+
+	float TimeLeft = 0.f;
+	if(MatchState == MatchState::WaitingToStart)
+	{
+		TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
+	}
+	else if (MatchState == MatchState::InProgress)
+	{
+		TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
+	}
+	else if(MatchState == MatchState::Cooldown)
+	{
+		TimeLeft = CooldownTime + WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
+	}
+	
+	uint32 SecondLeft = FMath::CeilToInt(TimeLeft);
 
 	if(CountdownInt != SecondLeft)
 	{
-		SetHUDMatchCountdown(MatchTime - GetServerTime());
+		if(MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown)
+		{
+			SetAnnouncementCountdown(TimeLeft);
+		}
+		else if(MatchState == MatchState::InProgress)
+		{
+			SetHUDMatchCountdown(TimeLeft);
+		}
 	}
 	CountdownInt = SecondLeft;
 }
@@ -83,16 +144,33 @@ void ASBPlayerController::Client_ReportServerTime_Implementation(float TimeOfCli
 }
 
 
-void ASBPlayerController::SetHUDMatchCountdown(float CountdownTime)
+void ASBPlayerController::SetHUDMatchCountdown(const float CountdownTime)
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
-	const bool bHUDValid = SBGameHUD && SBGameHUD->PlayerHUDWidget && SBGameHUD->PlayerHUDWidget->MatchCountdownTextBlock;
+	const bool bHUDValid = SBGameHUD && SBGameHUD->PlayerHUDWidget;
 	if(bHUDValid)
 	{
-		int32 Minutes = FMath::FloorToInt(CountdownTime / 60.f);
-		int32 Seconds = CountdownTime - Minutes * 60;
-		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
-		SBGameHUD->PlayerHUDWidget->MatchCountdownTextBlock->SetText(FText::FromString(CountdownText));
+		SBGameHUD->PlayerHUDWidget->SetCountdownText(CountdownTime);
+	}
+}
+
+void ASBPlayerController::SetAnnouncementCountdown(float CountdownTime)
+{
+	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
+	const bool bHUDValid = SBGameHUD && SBGameHUD->AnnouncementWidget;
+	if(bHUDValid)
+	{
+		SBGameHUD->AnnouncementWidget->SetCountdownText(CountdownTime);
+	}
+}
+
+void ASBPlayerController::SetTopScoringPlayer(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates)
+{
+	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
+	const bool bHUDValid = SBGameHUD && SBGameHUD->PlayerHUDWidget;
+	if(bHUDValid)
+	{
+		SBGameHUD->PlayerHUDWidget->OnTopScoringPlayersSet(InTopScoringPlayerStates);
 	}
 }
 
@@ -117,13 +195,14 @@ void ASBPlayerController::ReceivedPlayer()
 
 void ASBPlayerController::OnRep_MatchState()
 {
+	// Adding HUD to viewport and hiding Announcement widget on client
 	if(MatchState == MatchState::InProgress)
 	{
-		SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
-		if(SBGameHUD)
-		{
-			SBGameHUD->AddHUDWidget();
-		}
+		HandleMatchHasStarted();
+	}
+	else if(MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
 	}
 }
 
@@ -131,13 +210,65 @@ void ASBPlayerController::OnMatchStateSet(FName InMatchState)
 {
 	MatchState = InMatchState;
 
-	// Adding HUD widget to viewport
-	if(MatchState == MatchState::InProgress)
+	// Adding HUD to viewport and hiding Announcement widget on listen-server
+	if(MatchState == MatchState::InProgress && IsLocalController())
 	{
-		SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
-		if(SBGameHUD)
+		HandleMatchHasStarted();
+	}
+	else if(MatchState == MatchState::Cooldown)
+	{
+		HandleCooldown();
+	}
+}
+
+void ASBPlayerController::OnTopScoringPlayersSet(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates)
+{
+	TopScoringPlayerStates = InTopScoringPlayerStates;
+
+	//Set Top of all players in widget on listen-server
+	if(HasAuthority() && IsLocalController())
+	{
+		SetTopScoringPlayer(TopScoringPlayerStates);
+	}
+}
+
+void ASBPlayerController::OnRep_TopScoringPlayers()
+{
+	//Set Top of all players in widget on client
+	SetTopScoringPlayer(TopScoringPlayerStates);
+}
+
+void ASBPlayerController::HandleMatchHasStarted()
+{
+	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
+	if(SBGameHUD)
+	{
+		SBGameHUD->AddHUDWidget();
+		if(SBGameHUD->PlayerHUDWidget)
 		{
-			SBGameHUD->AddHUDWidget();
+			SBGameHUD->PlayerHUDWidget->OnTopScoringPlayersSet(TopScoringPlayerStates);
+		}
+		if(SBGameHUD->AnnouncementWidget)
+		{
+			SBGameHUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void ASBPlayerController::HandleCooldown()
+{
+	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
+	if(SBGameHUD)
+	{
+		if(SBGameHUD->PlayerHUDWidget)
+		{
+			SBGameHUD->PlayerHUDWidget->RemoveFromParent();
+		}
+		if(SBGameHUD->AnnouncementWidget)
+		{
+			SBGameHUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
+			FString AnnouncementText("New Match starts in:");
+			SBGameHUD->AnnouncementWidget->SetAnnouncementText(FText::FromString(AnnouncementText));
 		}
 	}
 }

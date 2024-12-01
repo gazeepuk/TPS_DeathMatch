@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "SBPlayerController.generated.h"
 
+class ADeathMatchPlayerState;
 class UInputMappingContext;
 class ASBGameHUD;
 /**
@@ -18,13 +19,16 @@ class SHOOTYBOOTY_API ASBPlayerController : public APlayerController
 public:
 	ASBPlayerController();
 	void SetHUDMatchCountdown(float CountdownTime);
-
+	void SetAnnouncementCountdown(float CountdownTime);
+	void SetTopScoringPlayer(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates);
+	
 	//Synced with server world clock
 	virtual float GetServerTime();
 	//Sync with server clock
 	virtual void ReceivedPlayer() override;
 
 	void OnMatchStateSet(FName InMatchState);
+	void OnTopScoringPlayersSet(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates);
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -44,25 +48,38 @@ protected:
 
 	// Difference between server and client time
 	float ClientServerDelta = 0.f;
-
 	UPROPERTY(EditAnywhere)
 	float TimeSyncFrequency = 5.f;
-
 	float TimeSyncRunningTime = 0.f;
+
+	UFUNCTION(Server, Reliable)
+	void Server_CheckMatchState();
+
+	UFUNCTION(Client,Reliable)
+	void Client_JoinMidgame(FName InMatchState, float InWarmupTime, float InCooldownTime, float InMatchTime, float InLevelStartingTime);
+
 private:
 	virtual void Tick(float DeltaSeconds) override;
 	void CheckTimeSynced(float DeltaSeconds);
 
 	TObjectPtr<ASBGameHUD> SBGameHUD;
 	
-	UPROPERTY(EditDefaultsOnly)
-	float MatchTime = 450.f;
-	UPROPERTY(EditDefaultsOnly)
-	float WarmupTime = 90.f;
+	float MatchTime = 0.f;
+	float WarmupTime = 0.f;
+	float CooldownTime = 0.f;
+	float LevelStartingTime = 0.f;
 	uint32 CountdownInt = 0;
 
 	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
 	FName MatchState;
 	UFUNCTION()
 	void OnRep_MatchState();
+
+	UPROPERTY(ReplicatedUsing = OnRep_TopScoringPlayers)
+	TArray<ADeathMatchPlayerState*> TopScoringPlayerStates;
+	UFUNCTION()
+	void OnRep_TopScoringPlayers();
+	
+	void HandleMatchHasStarted();
+	void HandleCooldown();
 };

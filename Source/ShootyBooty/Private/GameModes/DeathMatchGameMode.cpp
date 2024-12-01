@@ -2,8 +2,12 @@
 
 
 #include "GameModes/DeathMatchGameMode.h"
-
 #include "SBPlayerController.h"
+
+namespace MatchState
+{
+	const FName Cooldown = FName("Cooldown");
+}
 
 
 ADeathMatchGameMode::ADeathMatchGameMode()
@@ -23,6 +27,22 @@ void ADeathMatchGameMode::Tick(float DeltaSeconds)
 		if(CountdownTime <= 0.f)
 		{
 			StartMatch();
+		}
+	}
+	else if(MatchState == MatchState::InProgress)
+	{
+		CountdownTime = MatchTime + WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if(CountdownTime <= 0.f)
+		{
+			SetMatchState(MatchState::Cooldown);
+		}
+	}
+	else if(MatchState == MatchState::Cooldown)
+	{
+		CountdownTime = CooldownTime + MatchTime + WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if(CountdownTime <= 0.f)
+		{
+			RestartGame();
 		}
 	}
 }

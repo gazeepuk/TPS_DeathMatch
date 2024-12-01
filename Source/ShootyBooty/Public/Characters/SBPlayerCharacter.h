@@ -20,12 +20,12 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
-	
+	UFUNCTION(Server, Reliable)
+	void Server_AddScore();
+
 	//Camera
-protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<UCameraComponent> CameraComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 

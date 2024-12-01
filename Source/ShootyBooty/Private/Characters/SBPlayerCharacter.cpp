@@ -9,6 +9,7 @@
 #include "SBWeaponComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "PlayerStates/DeathMatchPlayerState.h"
 
 ASBPlayerCharacter::ASBPlayerCharacter(const FObjectInitializer& ObjInit):
 Super(ObjInit.SetDefaultSubobjectClass<USBCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -33,6 +34,15 @@ void ASBPlayerCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+}
+
+
+void ASBPlayerCharacter::Server_AddScore_Implementation()
+{
+	if(ADeathMatchPlayerState* DeathMatchPlayerState = GetPlayerState<ADeathMatchPlayerState>())
+	{
+		DeathMatchPlayerState->AddScore();
 	}
 }
 

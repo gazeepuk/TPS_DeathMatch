@@ -2,6 +2,8 @@
 
 
 #include "Components/SBHealthComponent.h"
+
+#include "SBPlayerCharacter.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 
@@ -72,6 +74,14 @@ void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, con
 
 	if (IsDead())
 	{
+		if(DamageCauser && DamageCauser->GetOwner())
+		{
+			ASBPlayerCharacter* SBPlayerCharacter = Cast<ASBPlayerCharacter>(DamageCauser->GetOwner());
+			if(SBPlayerCharacter)
+			{
+				SBPlayerCharacter->Server_AddScore_Implementation();
+			}
+		}
 		OnDeath.Broadcast();
 	}
 	

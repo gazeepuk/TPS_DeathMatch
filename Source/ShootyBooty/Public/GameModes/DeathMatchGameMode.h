@@ -6,7 +6,10 @@
 #include "GameFramework/GameMode.h"
 #include "DeathMatchGameMode.generated.h"
 
-
+namespace MatchState
+{
+	extern SHOOTYBOOTY_API const FName Cooldown; // Match has ended. Display winner and begin cooldown timer
+}
 /**
  * 
  */
@@ -14,13 +17,15 @@ UCLASS()
 class SHOOTYBOOTY_API ADeathMatchGameMode : public AGameMode
 {
 	GENERATED_BODY()
+	
 public:
 	ADeathMatchGameMode();
 
-	UPROPERTY(EditDefaultsOnly)
-	float WarmupTime = 5.f;
-
-	float LevelStartingTime = 0.f;
+	FORCEINLINE float GetWarmupTime() const { return WarmupTime; }
+	FORCEINLINE float GetMatchTime() const { return MatchTime; }
+	FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
+	FORCEINLINE float GetLevelStartingTime() const { return LevelStartingTime; }
+	
 protected:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void SwapPlayerControllers(APlayerController* OldPC, APlayerController* NewPC) override;
@@ -33,8 +38,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<APlayerController*> AllPlayerControllers;
 
+	UPROPERTY(EditDefaultsOnly)
+	float WarmupTime = 5.f;
+	UPROPERTY(EditDefaultsOnly)
+	float MatchTime = 10.f;
+	UPROPERTY(EditDefaultsOnly)
+	float CooldownTime = 10.f;
+	
 private:
 	virtual void Tick(float DeltaSeconds) override;
-	
+
+	float LevelStartingTime = 0.f;
 	float CountdownTime = 0.f;
 };
