@@ -4,6 +4,7 @@
 #include "Weapon/SBProjectile.h"
 
 #include "Components/SphereComponent.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -42,11 +43,16 @@ void ASBProjectile::BeginPlay()
 void ASBProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                                     UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!GetWorld()) return;
+	if (!GetWorld())
+	{
+		return;
+	}
 
 	MovementComponent->StopMovementImmediately();
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), DamageAmount, GetActorLocation(), DamageRadius,
-	                                    UDamageType::StaticClass(), {}, this, GetController(), bDoFullDamage);
+
+	ACharacter* OwnerCharacter = GetOwner<ACharacter>();
+	AController* OwnerController = OwnerCharacter ? OwnerCharacter->GetController() : nullptr;
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), DamageAmount, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), {}, this, GetController(), bDoFullDamage);
 
 	DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, LifeSeconds);
 

@@ -42,7 +42,7 @@ void ASBPlayerCharacter::Server_AddScore_Implementation()
 {
 	if(ADeathMatchPlayerState* DeathMatchPlayerState = GetPlayerState<ADeathMatchPlayerState>())
 	{
-		DeathMatchPlayerState->AddScore();
+		DeathMatchPlayerState->AddScore(1);
 	}
 }
 

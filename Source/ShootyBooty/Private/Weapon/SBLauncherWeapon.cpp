@@ -32,6 +32,7 @@ void ASBLauncherWeapon::NetMulticast_SpawnProjectile_Implementation(TSubclassOf<
 	{
 		Projectile->SetShotDirection(InDirection);
 		Projectile->SetOwner(GetOwner());
+		Projectile->SetInstigator(GetOwner<APawn>());
 		Projectile->FinishSpawning(InSpawnTransform);
 	}
 }

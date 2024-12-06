@@ -2,7 +2,12 @@
 
 
 #include "GameModes/DeathMatchGameMode.h"
+
+#include "SBPlayerCharacter.h"
 #include "SBPlayerController.h"
+#include "GameFramework/PlayerStart.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerStates/DeathMatchPlayerState.h"
 
 namespace MatchState
 {
@@ -44,6 +49,48 @@ void ADeathMatchGameMode::Tick(float DeltaSeconds)
 		{
 			RestartGame();
 		}
+	}
+}
+
+void ADeathMatchGameMode::PlayerEliminated(ASBPlayerCharacter* EliminatedCharacter,
+	ASBPlayerController* VictimController, ASBPlayerController* AttackerController)
+{
+	if(EliminatedCharacter)
+	{
+		EliminatedCharacter->OnDeath();
+	}
+
+	if(AttackerController)
+	{
+		ADeathMatchPlayerState* DeathMatchPlayerState = AttackerController->GetPlayerState<ADeathMatchPlayerState>();
+		if(DeathMatchPlayerState)
+		{
+			DeathMatchPlayerState->AddScore(1);
+		}
+	}
+	if(VictimController)
+	{
+		ADeathMatchPlayerState* DeathMatchPlayerState = VictimController->GetPlayerState<ADeathMatchPlayerState>();
+		if(DeathMatchPlayerState)
+		{
+			DeathMatchPlayerState->AddDefeats(1);
+		}
+	}
+}
+
+void ADeathMatchGameMode::RespawnPlayer(ACharacter* EliminatedCharacter, AController* EliminatedController)
+{
+	if(EliminatedCharacter)
+	{
+		EliminatedCharacter->Reset();
+		EliminatedCharacter->Destroy();
+	}
+	if(EliminatedController)
+	{
+		TArray<AActor*> AllPlayerStarts;
+		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), AllPlayerStarts);
+		int32 RandomPlayerStartIndex = FMath::RandRange(0, AllPlayerStarts.Num() - 1);
+		RestartPlayerAtPlayerStart(EliminatedController, AllPlayerStarts[RandomPlayerStartIndex]);
 	}
 }
 

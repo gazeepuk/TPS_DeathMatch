@@ -19,6 +19,9 @@ public:
 	void SetCountdownText(const FText& CountdownText) const;
 	void SetCountdownText(float CountdownTime) const;
 	void SetAnnouncementText(const FText& AnnouncementText) const;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetTopScoringPlayers(const TArray<APlayerState*>& TopScoringPlayers);
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> WarmupCountdownTextBlock;

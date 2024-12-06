@@ -40,7 +40,7 @@ public:
 	void SetCountdownText(const FText& CountdownText) const;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnTopScoringPlayersSet(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayers);
+	void OnTopScoringPlayersSet(const TArray<APlayerState*>& InTopScoringPlayers);
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> MatchCountdownTextBlock;

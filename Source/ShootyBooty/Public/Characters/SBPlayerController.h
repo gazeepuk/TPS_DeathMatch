@@ -20,7 +20,7 @@ public:
 	ASBPlayerController();
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetAnnouncementCountdown(float CountdownTime);
-	void SetTopScoringPlayer(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates);
+	void SetTopScoringPlayer(const TArray<APlayerState*>& InTopScoringPlayerStates);
 	
 	//Synced with server world clock
 	virtual float GetServerTime();
@@ -28,7 +28,6 @@ public:
 	virtual void ReceivedPlayer() override;
 
 	void OnMatchStateSet(FName InMatchState);
-	void OnTopScoringPlayersSet(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates);
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -74,11 +73,6 @@ private:
 	FName MatchState;
 	UFUNCTION()
 	void OnRep_MatchState();
-
-	UPROPERTY(ReplicatedUsing = OnRep_TopScoringPlayers)
-	TArray<ADeathMatchPlayerState*> TopScoringPlayerStates;
-	UFUNCTION()
-	void OnRep_TopScoringPlayers();
 	
 	void HandleMatchHasStarted();
 	void HandleCooldown();

@@ -17,14 +17,5 @@ class SHOOTYBOOTY_API ADeathMatchGameState : public AGameState
 
 public:
 	ADeathMatchGameState();
-	virtual void AddPlayerState(APlayerState* PlayerState) override;
-	virtual void RemovePlayerState(APlayerState* PlayerState) override;
-
-	void UpdateTopScore();
-
-protected:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UPROPERTY(Replicated)
-	TArray<ADeathMatchPlayerState*> TopScoringPlayerStates;
+	TArray<APlayerState*> GetTopScoringPlayers() const;
 };

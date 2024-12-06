@@ -9,6 +9,7 @@
 #include "Components/TextRenderComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/DamageEvents.h"
+#include "GameModes/DeathMatchGameMode.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseCharacterLog, All, All);
 
@@ -74,29 +75,36 @@ void ASBBaseCharacter::OnDeath()
 {
 	UE_LOG(LogBaseCharacterLog, Error, TEXT("Player %s is dead"),*GetName())
 
-	NetMulticast_PlayAnimMontage(DeathAnimMontage);
-	GetCharacterMovement()->DisableMovement();
-
-	SetLifeSpan(5.0f);
-	
 	NetMulticast_OnDeath();
+
+	GetWorldTimerManager().ClearTimer(RespawnTimerHandle);
+	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASBBaseCharacter::Respawn, RespawnDelay);
 }
 
 //Runs on Server and Clients
 void ASBBaseCharacter::NetMulticast_OnDeath_Implementation()
 {
-	if(Controller)
-	{
-		Controller->ChangeState(NAME_Spectating);
-	}
-	
-	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
-	WeaponComponent->StopFire();
+	PlayAnimMontage(DeathAnimMontage);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	HealthTextComponent->SetVisibility(false);
+
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	DisableInput(GetController<APlayerController>());
 }
 
 void ASBBaseCharacter::OnHealthChanged(const float Health) const
 {
 	HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+}
+
+void ASBBaseCharacter::Respawn()
+{
+	ADeathMatchGameMode* DeathMatchGameMode = GetWorld()->GetAuthGameMode<ADeathMatchGameMode>();
+	if(DeathMatchGameMode)
+	{
+		DeathMatchGameMode->RespawnPlayer(this, GetController());
+	}
 }
 
 

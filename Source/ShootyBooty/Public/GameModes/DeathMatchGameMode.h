@@ -3,8 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SBPlayerController.h"
 #include "GameFramework/GameMode.h"
 #include "DeathMatchGameMode.generated.h"
+
+class ASBPlayerController;
+class ASBPlayerCharacter;
 
 namespace MatchState
 {
@@ -25,6 +29,9 @@ public:
 	FORCEINLINE float GetMatchTime() const { return MatchTime; }
 	FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
 	FORCEINLINE float GetLevelStartingTime() const { return LevelStartingTime; }
+
+	virtual void PlayerEliminated(ASBPlayerCharacter* EliminatedCharacter, ASBPlayerController* VictimController, ASBPlayerController* AttackerController);
+	void RespawnPlayer(ACharacter* EliminatedCharacter, AController* EliminatedController);
 	
 protected:
 	virtual void PostLogin(APlayerController* NewPlayer) override;

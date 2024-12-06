@@ -9,7 +9,9 @@
 #include "SBPlayerHUDWidget.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/GameMode.h"
+#include "GameFramework/GameState.h"
 #include "GameModes/DeathMatchGameMode.h"
+#include "GameStates/DeathMatchGameState.h"
 #include "Net/UnrealNetwork.h"
 
 ASBPlayerController::ASBPlayerController()
@@ -36,7 +38,6 @@ void ASBPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASBPlayerController, MatchState);
-	DOREPLIFETIME(ASBPlayerController, TopScoringPlayerStates);
 }
 
 void ASBPlayerController::Server_CheckMatchState_Implementation()
@@ -164,7 +165,7 @@ void ASBPlayerController::SetAnnouncementCountdown(float CountdownTime)
 	}
 }
 
-void ASBPlayerController::SetTopScoringPlayer(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates)
+void ASBPlayerController::SetTopScoringPlayer(const TArray<APlayerState*>& InTopScoringPlayerStates)
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
 	const bool bHUDValid = SBGameHUD && SBGameHUD->PlayerHUDWidget;
@@ -173,6 +174,8 @@ void ASBPlayerController::SetTopScoringPlayer(const TArray<ADeathMatchPlayerStat
 		SBGameHUD->PlayerHUDWidget->OnTopScoringPlayersSet(InTopScoringPlayerStates);
 	}
 }
+
+
 
 float ASBPlayerController::GetServerTime()
 {
@@ -221,32 +224,16 @@ void ASBPlayerController::OnMatchStateSet(FName InMatchState)
 	}
 }
 
-void ASBPlayerController::OnTopScoringPlayersSet(const TArray<ADeathMatchPlayerState*>& InTopScoringPlayerStates)
-{
-	TopScoringPlayerStates = InTopScoringPlayerStates;
-
-	//Set Top of all players in widget on listen-server
-	if(HasAuthority() && IsLocalController())
-	{
-		SetTopScoringPlayer(TopScoringPlayerStates);
-	}
-}
-
-void ASBPlayerController::OnRep_TopScoringPlayers()
-{
-	//Set Top of all players in widget on client
-	SetTopScoringPlayer(TopScoringPlayerStates);
-}
-
 void ASBPlayerController::HandleMatchHasStarted()
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
 	if(SBGameHUD)
 	{
 		SBGameHUD->AddHUDWidget();
-		if(SBGameHUD->PlayerHUDWidget)
+		AGameState* GameState = GetWorld()->GetGameState<AGameState>();
+		if(SBGameHUD->PlayerHUDWidget && GameState)
 		{
-			SBGameHUD->PlayerHUDWidget->OnTopScoringPlayersSet(TopScoringPlayerStates);
+			SBGameHUD->PlayerHUDWidget->OnTopScoringPlayersSet(GameState->PlayerArray);
 		}
 		if(SBGameHUD->AnnouncementWidget)
 		{
@@ -269,6 +256,12 @@ void ASBPlayerController::HandleCooldown()
 			SBGameHUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
 			FString AnnouncementText("New Match starts in:");
 			SBGameHUD->AnnouncementWidget->SetAnnouncementText(FText::FromString(AnnouncementText));
+
+			ADeathMatchGameState* DeathMatchGameState = GetWorld()->GetGameState<ADeathMatchGameState>();
+			if(DeathMatchGameState)
+			{
+				SBGameHUD->AnnouncementWidget->SetTopScoringPlayers(DeathMatchGameState->GetTopScoringPlayers());
+			}
 		}
 	}
 }

@@ -5,6 +5,7 @@
 
 #include "SBPlayerCharacter.h"
 #include "GameFramework/Actor.h"
+#include "GameModes/DeathMatchGameMode.h"
 #include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All)
@@ -71,18 +72,20 @@ void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, con
 	}
 
 	SetHealth(CurrentHealth - Damage);
-
+	
+	
 	if (IsDead())
 	{
-		if(DamageCauser && DamageCauser->GetOwner())
+		ADeathMatchGameMode* DeathMatchGameMode = GetWorld()->GetAuthGameMode<ADeathMatchGameMode>();
+		if(DeathMatchGameMode)
 		{
-			ASBPlayerCharacter* SBPlayerCharacter = Cast<ASBPlayerCharacter>(DamageCauser->GetOwner());
-			if(SBPlayerCharacter)
-			{
-				SBPlayerCharacter->Server_AddScore_Implementation();
-			}
+			ASBPlayerCharacter* OwningCharacter = GetOwner<ASBPlayerCharacter>();
+			ASBPlayerController* VictimController = OwningCharacter ? OwningCharacter->GetController<ASBPlayerController>() : nullptr;
+			ASBPlayerController* AttackerController = InstigatedBy ? Cast<ASBPlayerController>(InstigatedBy) : nullptr;
+			DeathMatchGameMode->PlayerEliminated(GetOwner<ASBPlayerCharacter>(), VictimController, AttackerController);
 		}
-		OnDeath.Broadcast();
+		
+		//OnDeath.Broadcast();
 	}
 	
 	else if (bAutoHeal)

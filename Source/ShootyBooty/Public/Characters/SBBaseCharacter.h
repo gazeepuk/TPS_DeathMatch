@@ -21,6 +21,9 @@ class SHOOTYBOOTY_API ASBBaseCharacter : public ACharacter
 
 public:
 	ASBBaseCharacter(const FObjectInitializer& ObjInit);
+	void Eliminate();
+	virtual void OnDeath();
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -35,13 +38,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> DeathAnimMontage;
 
-	virtual void OnDeath();
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_OnDeath();
 	
 private:
 	UFUNCTION()
 	void OnHealthChanged(float Health) const;
+
+	FTimerHandle RespawnTimerHandle;
+	UPROPERTY(EditDefaultsOnly)
+	float RespawnDelay = 3.f;
+	UFUNCTION()
+	void Respawn();
 
 	//Land damage
 protected:
