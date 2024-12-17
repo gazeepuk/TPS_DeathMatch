@@ -3,7 +3,7 @@
 
 #include "PlayerStates/DeathMatchPlayerState.h"
 
-#include "SBPlayerController.h"
+#include "Controllers/DeathMatchPlayerController.h"
 #include "GameStates/DeathMatchGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -39,7 +39,7 @@ void ADeathMatchPlayerState::OnScoreSet()
 	if(!SBPlayerController)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		SBPlayerController = PlayerController ? Cast<ASBPlayerController>(PlayerController) : nullptr;
+		SBPlayerController = PlayerController ? Cast<ADeathMatchPlayerController>(PlayerController) : nullptr;
 	}
 
 	if(!SBPlayerController)

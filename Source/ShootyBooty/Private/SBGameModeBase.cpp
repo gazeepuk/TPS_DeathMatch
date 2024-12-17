@@ -5,10 +5,10 @@
 
 #include "SBBaseCharacter.h"
 #include "SBGameHUD.h"
-#include "SBPlayerController.h"
+#include "Controllers/DeathMatchPlayerController.h"
 ASBGameModeBase::ASBGameModeBase()
 {
 	DefaultPawnClass = ASBBaseCharacter::StaticClass();
-	PlayerControllerClass = ASBPlayerController::StaticClass();
+	PlayerControllerClass = ADeathMatchPlayerController::StaticClass();
 	HUDClass = ASBGameHUD::StaticClass();
 }

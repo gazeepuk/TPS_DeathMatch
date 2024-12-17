@@ -1,7 +1,7 @@
 // ShootyBooty by @GazeePuk. All Rights Reversed
 
 
-#include "SBPlayerController.h"
+#include "Controllers/DeathMatchPlayerController.h"
 
 #include "AnnouncementWidget.h"
 #include "EnhancedInputSubsystems.h"
@@ -14,12 +14,12 @@
 #include "GameStates/DeathMatchGameState.h"
 #include "Net/UnrealNetwork.h"
 
-ASBPlayerController::ASBPlayerController()
+ADeathMatchPlayerController::ADeathMatchPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void ASBPlayerController::BeginPlay()
+void ADeathMatchPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
@@ -31,16 +31,23 @@ void ASBPlayerController::BeginPlay()
 
 	SBGameHUD = GetHUD<ASBGameHUD>();
 	Server_CheckMatchState();
+
+	if(IsLocalPlayerController())
+	{
+		FInputModeGameOnly InputModeGameOnly;
+		SetInputMode(InputModeGameOnly);
+		SetShowMouseCursor(false);
+	}
 }
 
-void ASBPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ADeathMatchPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ASBPlayerController, MatchState);
+	DOREPLIFETIME(ADeathMatchPlayerController, MatchState);
 }
 
-void ASBPlayerController::Server_CheckMatchState_Implementation()
+void ADeathMatchPlayerController::Server_CheckMatchState_Implementation()
 {
 	const ADeathMatchGameMode* DeathMatchGameMode = GetWorld()->GetAuthGameMode<ADeathMatchGameMode>();
 	if(DeathMatchGameMode)
@@ -59,7 +66,7 @@ void ASBPlayerController::Server_CheckMatchState_Implementation()
 	}
 }
 
-void ASBPlayerController::Client_JoinMidgame_Implementation(FName InMatchState, float InWarmupTime, float InCooldownTime,
+void ADeathMatchPlayerController::Client_JoinMidgame_Implementation(FName InMatchState, float InWarmupTime, float InCooldownTime,
                                                             float InMatchTime, float InLevelStartingTime)
 {
 	MatchState = InMatchState;
@@ -75,7 +82,7 @@ void ASBPlayerController::Client_JoinMidgame_Implementation(FName InMatchState, 
 	}
 }
 
-void ASBPlayerController::Tick(float DeltaSeconds)
+void ADeathMatchPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
@@ -83,7 +90,7 @@ void ASBPlayerController::Tick(float DeltaSeconds)
 	CheckTimeSynced(DeltaSeconds);
 }
 
-void ASBPlayerController::CheckTimeSynced(float DeltaSeconds)
+void ADeathMatchPlayerController::CheckTimeSynced(float DeltaSeconds)
 {
 	TimeSyncRunningTime +=  DeltaSeconds;
 
@@ -95,7 +102,7 @@ void ASBPlayerController::CheckTimeSynced(float DeltaSeconds)
 }
 
 
-void ASBPlayerController::SetHUDTime()
+void ADeathMatchPlayerController::SetHUDTime()
 {
 
 	float TimeLeft = 0.f;
@@ -128,14 +135,14 @@ void ASBPlayerController::SetHUDTime()
 	CountdownInt = SecondLeft;
 }
 
-void ASBPlayerController::Server_RequestServerTime_Implementation(float TimeOfClientRequest)
+void ADeathMatchPlayerController::Server_RequestServerTime_Implementation(float TimeOfClientRequest)
 {
 	float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();
 
 	Client_ReportServerTime(TimeOfClientRequest, ServerTimeOfReceipt);
 }
 
-void ASBPlayerController::Client_ReportServerTime_Implementation(float TimeOfClientRequest,
+void ADeathMatchPlayerController::Client_ReportServerTime_Implementation(float TimeOfClientRequest,
 	float TimeServerReceivedClientRequest)
 {
 	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
@@ -145,7 +152,7 @@ void ASBPlayerController::Client_ReportServerTime_Implementation(float TimeOfCli
 }
 
 
-void ASBPlayerController::SetHUDMatchCountdown(const float CountdownTime)
+void ADeathMatchPlayerController::SetHUDMatchCountdown(const float CountdownTime)
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
 	const bool bHUDValid = SBGameHUD && SBGameHUD->PlayerHUDWidget;
@@ -155,7 +162,7 @@ void ASBPlayerController::SetHUDMatchCountdown(const float CountdownTime)
 	}
 }
 
-void ASBPlayerController::SetAnnouncementCountdown(float CountdownTime)
+void ADeathMatchPlayerController::SetAnnouncementCountdown(float CountdownTime)
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
 	const bool bHUDValid = SBGameHUD && SBGameHUD->AnnouncementWidget;
@@ -165,7 +172,7 @@ void ASBPlayerController::SetAnnouncementCountdown(float CountdownTime)
 	}
 }
 
-void ASBPlayerController::SetTopScoringPlayer(const TArray<APlayerState*>& InTopScoringPlayerStates)
+void ADeathMatchPlayerController::SetTopScoringPlayer(const TArray<APlayerState*>& InTopScoringPlayerStates)
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
 	const bool bHUDValid = SBGameHUD && SBGameHUD->PlayerHUDWidget;
@@ -177,7 +184,7 @@ void ASBPlayerController::SetTopScoringPlayer(const TArray<APlayerState*>& InTop
 
 
 
-float ASBPlayerController::GetServerTime()
+float ADeathMatchPlayerController::GetServerTime()
 {
 	if(HasAuthority())
 	{
@@ -187,7 +194,7 @@ float ASBPlayerController::GetServerTime()
 	return GetWorld()->GetTimeSeconds() + ClientServerDelta;
 }
 
-void ASBPlayerController::ReceivedPlayer()
+void ADeathMatchPlayerController::ReceivedPlayer()
 {
 	Super::ReceivedPlayer();
 	if(IsLocalController())
@@ -196,7 +203,7 @@ void ASBPlayerController::ReceivedPlayer()
 	}
 }
 
-void ASBPlayerController::OnRep_MatchState()
+void ADeathMatchPlayerController::OnRep_MatchState()
 {
 	// Adding HUD to viewport and hiding Announcement widget on client
 	if(MatchState == MatchState::InProgress)
@@ -209,7 +216,7 @@ void ASBPlayerController::OnRep_MatchState()
 	}
 }
 
-void ASBPlayerController::OnMatchStateSet(FName InMatchState)
+void ADeathMatchPlayerController::OnMatchStateSet(FName InMatchState)
 {
 	MatchState = InMatchState;
 
@@ -224,7 +231,7 @@ void ASBPlayerController::OnMatchStateSet(FName InMatchState)
 	}
 }
 
-void ASBPlayerController::HandleMatchHasStarted()
+void ADeathMatchPlayerController::HandleMatchHasStarted()
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
 	if(SBGameHUD)
@@ -242,7 +249,7 @@ void ASBPlayerController::HandleMatchHasStarted()
 	}
 }
 
-void ASBPlayerController::HandleCooldown()
+void ADeathMatchPlayerController::HandleCooldown()
 {
 	SBGameHUD = SBGameHUD == nullptr ? GetHUD<ASBGameHUD>() : SBGameHUD;
 	if(SBGameHUD)

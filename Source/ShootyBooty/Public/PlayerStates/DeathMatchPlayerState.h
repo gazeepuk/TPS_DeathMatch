@@ -7,7 +7,7 @@
 #include "DeathMatchPlayerState.generated.h"
 
 class ADeathMatchGameState;
-class ASBPlayerController;
+class ADeathMatchPlayerController;
 /**
  * 
  */
@@ -27,7 +27,7 @@ public:
 
 private:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	TObjectPtr<ASBPlayerController> SBPlayerController;
+	TObjectPtr<ADeathMatchPlayerController> SBPlayerController;
 	TObjectPtr<ADeathMatchGameState> DeathMatchGameState;
 
 	void OnScoreSet();

@@ -4,6 +4,7 @@
 #include "Components/SBHealthComponent.h"
 
 #include "SBPlayerCharacter.h"
+#include "Controllers/DeathMatchPlayerController.h"
 #include "GameFramework/Actor.h"
 #include "GameModes/DeathMatchGameMode.h"
 #include "Net/UnrealNetwork.h"
@@ -80,8 +81,8 @@ void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, con
 		if(DeathMatchGameMode)
 		{
 			ASBPlayerCharacter* OwningCharacter = GetOwner<ASBPlayerCharacter>();
-			ASBPlayerController* VictimController = OwningCharacter ? OwningCharacter->GetController<ASBPlayerController>() : nullptr;
-			ASBPlayerController* AttackerController = InstigatedBy ? Cast<ASBPlayerController>(InstigatedBy) : nullptr;
+			ADeathMatchPlayerController* VictimController = OwningCharacter ? OwningCharacter->GetController<ADeathMatchPlayerController>() : nullptr;
+			ADeathMatchPlayerController* AttackerController = InstigatedBy ? Cast<ADeathMatchPlayerController>(InstigatedBy) : nullptr;
 			DeathMatchGameMode->PlayerEliminated(GetOwner<ASBPlayerCharacter>(), VictimController, AttackerController);
 		}
 		

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "SBPlayerController.generated.h"
+#include "DeathMatchPlayerController.generated.h"
 
 class ADeathMatchPlayerState;
 class UInputMappingContext;
@@ -13,11 +13,11 @@ class ASBGameHUD;
  * 
  */
 UCLASS()
-class SHOOTYBOOTY_API ASBPlayerController : public APlayerController
+class SHOOTYBOOTY_API ADeathMatchPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	ASBPlayerController();
+	ADeathMatchPlayerController();
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetAnnouncementCountdown(float CountdownTime);
 	void SetTopScoringPlayer(const TArray<APlayerState*>& InTopScoringPlayerStates);

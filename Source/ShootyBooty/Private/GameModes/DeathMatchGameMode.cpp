@@ -4,7 +4,7 @@
 #include "GameModes/DeathMatchGameMode.h"
 
 #include "SBPlayerCharacter.h"
-#include "SBPlayerController.h"
+#include "Controllers/DeathMatchPlayerController.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlayerStates/DeathMatchPlayerState.h"
@@ -53,7 +53,7 @@ void ADeathMatchGameMode::Tick(float DeltaSeconds)
 }
 
 void ADeathMatchGameMode::PlayerEliminated(ASBPlayerCharacter* EliminatedCharacter,
-	ASBPlayerController* VictimController, ASBPlayerController* AttackerController)
+	ADeathMatchPlayerController* VictimController, ADeathMatchPlayerController* AttackerController)
 {
 	if(EliminatedCharacter)
 	{
@@ -128,7 +128,7 @@ void ADeathMatchGameMode::OnMatchStateSet()
 
 	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		ASBPlayerController* PlayerController = Cast<ASBPlayerController>(*It);
+		ADeathMatchPlayerController* PlayerController = Cast<ADeathMatchPlayerController>(*It);
 		if(PlayerController)
 		{
 			PlayerController->OnMatchStateSet(MatchState);

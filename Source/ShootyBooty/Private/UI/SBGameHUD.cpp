@@ -4,7 +4,7 @@
 #include "UI/SBGameHUD.h"
 
 #include "AnnouncementWidget.h"
-#include "SBPlayerController.h"
+#include "Controllers/DeathMatchPlayerController.h"
 #include "SBPlayerHUDWidget.h"
 #include "Blueprint/UserWidget.h"
 
@@ -15,7 +15,7 @@ void ASBGameHUD::AddHUDWidget()
 		return;
 	}
 	
-	ASBPlayerController* SBPlayerController = GetOwningPlayerController() ? Cast<ASBPlayerController>(GetOwningPlayerController()) : nullptr;
+	ADeathMatchPlayerController* SBPlayerController = GetOwningPlayerController() ? Cast<ADeathMatchPlayerController>(GetOwningPlayerController()) : nullptr;
 	if(SBPlayerController && PlayerHUDWidgetClass)
 	{
 		PlayerHUDWidget = CreateWidget<USBPlayerHUDWidget>(SBPlayerController, PlayerHUDWidgetClass);
@@ -33,7 +33,7 @@ void ASBGameHUD::AddAnnouncementWidget()
 		return;
 	}
 	
-	ASBPlayerController* SBPlayerController = GetOwningPlayerController() ? Cast<ASBPlayerController>(GetOwningPlayerController()) : nullptr;
+	ADeathMatchPlayerController* SBPlayerController = GetOwningPlayerController() ? Cast<ADeathMatchPlayerController>(GetOwningPlayerController()) : nullptr;
 	if(SBPlayerController && AnnouncementWidgetClass)
 	{
 		AnnouncementWidget = CreateWidget<UAnnouncementWidget>(SBPlayerController, AnnouncementWidgetClass);
