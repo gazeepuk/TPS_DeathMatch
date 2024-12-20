@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 #pragma once
 
@@ -21,7 +22,6 @@ class SHOOTYBOOTY_API ASBBaseCharacter : public ACharacter
 
 public:
 	ASBBaseCharacter(const FObjectInitializer& ObjInit);
-	void Eliminate();
 	virtual void OnDeath();
 	
 protected:

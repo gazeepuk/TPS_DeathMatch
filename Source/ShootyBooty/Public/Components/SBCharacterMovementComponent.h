@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 #pragma once
 
@@ -16,5 +17,5 @@ class SHOOTYBOOTY_API USBCharacterMovementComponent : public UCharacterMovementC
 public:
 	virtual float GetMaxSpeed() const override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Movement", meta=(ClampMin = "1.5", ClampMax="10"))
-	float RunModifire = 2.0f;
+	float RunModifier = 2.0f;
 };

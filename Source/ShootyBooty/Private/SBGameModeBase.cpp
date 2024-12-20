@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "SBGameModeBase.h"

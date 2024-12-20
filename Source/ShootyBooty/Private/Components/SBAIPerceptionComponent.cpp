@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "Components/SBAIPerceptionComponent.h"
@@ -32,10 +33,10 @@ AActor* USBAIPerceptionComponent::GetClosestEnemy() const
 	AActor* NearestPawn = nullptr;
 	for(const auto PercieveActor : PercieveActors)
 	{
-		if(const auto HealthComponent = USBUtils::GetHealthComponent(PercieveActor);
+		if(const USBHealthComponent* HealthComponent = USBUtils::GetHealthComponent(PercieveActor);
 			HealthComponent && !HealthComponent->IsDead())
 		{
-			const auto CurrentDistance = (PercieveActor->GetActorLocation() - Pawn->GetActorLocation()).Size();
+			const float CurrentDistance = (PercieveActor->GetActorLocation() - Pawn->GetActorLocation()).Size();
 			if(CurrentDistance < ShortestDistance)
 			{
 				ShortestDistance = CurrentDistance;

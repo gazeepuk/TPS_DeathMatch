@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "SBWeaponComponent.h"
@@ -21,6 +22,7 @@ void USBWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Spawns and equips weapons on server
 	if(GetOwner()->HasAuthority())
 	{
 		CurrentWeaponIndex = 0;
@@ -98,7 +100,10 @@ void USBWeaponComponent::SpawnWeapons()
 	}
 	
 	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (!Character || !GetWorld()) return;
+	if (!Character || !GetWorld())
+	{
+		return;
+	}
 
 	for (const FWeaponData& WeaponDatum : WeaponData)
 	{
@@ -119,7 +124,11 @@ void USBWeaponComponent::SpawnWeapons()
 void USBWeaponComponent::AttachWeaponToSocket(ASBBaseWeapon* Weapon, USceneComponent* SceneComponent,
                                               const FName& SocketName)
 {
-	if (!Weapon || !SceneComponent) return;
+	if (!Weapon || !SceneComponent)
+	{
+		return;
+	}
+	
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
 	Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
 }
@@ -155,7 +164,7 @@ void USBWeaponComponent::EquipWeapon(int32 WeaponIndex)
 
 	CurrentWeapon = Weapons[WeaponIndex];
 
-	const auto CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData Data)
+	const FWeaponData* CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData Data)
 	{
 		return Data.WeaponClass == CurrentWeapon->GetClass();
 	});
@@ -226,8 +235,7 @@ void USBWeaponComponent::PlayAnimMontage(UAnimMontage* Animation, float PlayRate
 
 void USBWeaponComponent::InitAnimations()
 {
-	USBEquipFinishAnimNotify* EquipFinishedNotify = AnimUtils::FindNotifyByClass<USBEquipFinishAnimNotify>(
-		EquipAnimMontage);
+	USBEquipFinishAnimNotify* EquipFinishedNotify = AnimUtils::FindNotifyByClass<USBEquipFinishAnimNotify>(EquipAnimMontage);
 	if (EquipFinishedNotify)
 	{
 		EquipFinishedNotify->OnNotified.AddUObject(this, &USBWeaponComponent::OnEquipFinished);

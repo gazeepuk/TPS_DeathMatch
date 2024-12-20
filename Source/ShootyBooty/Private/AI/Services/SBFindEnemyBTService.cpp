@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "AI/Services/SBFindEnemyBTService.h"
@@ -15,11 +16,11 @@ USBFindEnemyBTService::USBFindEnemyBTService()
 
 void USBFindEnemyBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	const auto Blackboard = OwnerComp.GetBlackboardComponent();
+	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	if (Blackboard)
 	{
-		const auto Controller = OwnerComp.GetAIOwner();
-		const auto PerceptionComponent = Controller->FindComponentByClass<USBAIPerceptionComponent>();
+		const AAIController* Controller = OwnerComp.GetAIOwner();
+		const USBAIPerceptionComponent* PerceptionComponent = Controller->FindComponentByClass<USBAIPerceptionComponent>();
 		if(PerceptionComponent)
 		{
 			Blackboard->SetValueAsObject(EnemyActorKey.SelectedKeyName, PerceptionComponent->GetClosestEnemy());

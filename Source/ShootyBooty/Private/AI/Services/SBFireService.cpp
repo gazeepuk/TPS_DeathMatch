@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "AI/Services/SBFireService.h"
@@ -14,19 +15,19 @@ USBFireService::USBFireService()
 
 void USBFireService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	const auto Controller = OwnerComp.GetAIOwner();
-	const auto Blackboard = OwnerComp.GetBlackboardComponent();
+	const AAIController* Controller = OwnerComp.GetAIOwner();
+	const UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 
 	const bool bHasName = Blackboard && Blackboard->GetValueAsObject(EnemyActorKey.SelectedKeyName);
 
 	if(Controller)
 	{
-		const auto WeaponComponent = Controller->GetPawn()->FindComponentByClass<USBWeaponComponent>();
+		USBWeaponComponent* WeaponComponent = Controller->GetPawn()->FindComponentByClass<USBWeaponComponent>();
 		if(WeaponComponent)
 		{
 			bHasName ? WeaponComponent->StartFire() : WeaponComponent->StopFire();
 		}
 	}
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 	
+	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 }

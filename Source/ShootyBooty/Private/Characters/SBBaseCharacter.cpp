@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "SBBaseCharacter.h"
@@ -107,7 +108,7 @@ void ASBBaseCharacter::Respawn()
 	}
 }
 
-
+//Calculating and applying falling damage
 void ASBBaseCharacter::OnGroundLanded(const FHitResult& Hit)
 {
 	if(HasAuthority())

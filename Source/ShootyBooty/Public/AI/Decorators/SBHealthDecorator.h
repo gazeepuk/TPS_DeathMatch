@@ -1,4 +1,4 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski. GitHub / LinkedIn: gazeepuk
 
 #pragma once
 
@@ -18,6 +18,7 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
 	float HealthPercent = 0.6f;
-	
+
+	// Checking if AI-character should find a Health pickup 
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
 };

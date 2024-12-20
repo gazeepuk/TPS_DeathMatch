@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "AI/EQS/SBEnemyEnvQueryContext.h"
@@ -11,10 +12,13 @@
 void USBEnemyEnvQueryContext::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const
 {
 	AActor* QueryOwner = Cast<AActor>(QueryInstance.Owner.Get());
-	const auto Blackboard = UAIBlueprintHelperLibrary::GetBlackboard(QueryOwner);
+	const UBlackboardComponent* Blackboard = UAIBlueprintHelperLibrary::GetBlackboard(QueryOwner);
 
-	if(!Blackboard) return;
-	const auto ContextActor = Blackboard->GetValueAsObject(EnemyActorKeyName);
+	if(!Blackboard)
+	{
+		return;
+	}
 	
+	const UObject* ContextActor = Blackboard->GetValueAsObject(EnemyActorKeyName);
 	UEnvQueryItemType_Actor::SetContextHelper(ContextData, Cast<AActor>(ContextActor));
 }

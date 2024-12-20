@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "Controllers/DeathMatchPlayerController.h"
@@ -197,6 +198,7 @@ float ADeathMatchPlayerController::GetServerTime()
 void ADeathMatchPlayerController::ReceivedPlayer()
 {
 	Super::ReceivedPlayer();
+	
 	if(IsLocalController())
 	{
 		Server_RequestServerTime(GetWorld()->GetTimeSeconds());

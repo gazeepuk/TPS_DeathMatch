@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 #pragma once
 
@@ -17,6 +18,7 @@ class SHOOTYBOOTY_API ASBAIController : public AAIController
 
 public:
 	ASBAIController();
+	
 protected:
 UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USBAIPerceptionComponent* SBAIPerceptionComponent;

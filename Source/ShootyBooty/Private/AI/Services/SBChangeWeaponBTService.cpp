@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "AI/Services/SBChangeWeaponBTService.h"
@@ -13,10 +14,10 @@ USBChangeWeaponBTService::USBChangeWeaponBTService()
 
 void USBChangeWeaponBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	const auto Controller = OwnerComp.GetAIOwner();
+	const AAIController* Controller = OwnerComp.GetAIOwner();
 	if(Controller)
 	{
-		const auto WeaponComponent = Controller->GetPawn()->FindComponentByClass<USBWeaponComponent>();
+		USBWeaponComponent* WeaponComponent = Controller->GetPawn()->FindComponentByClass<USBWeaponComponent>();
 		if(WeaponComponent && Probability > 0 && FMath::FRand() <= Probability)
 		{
 			WeaponComponent->EquipNextWeapon();

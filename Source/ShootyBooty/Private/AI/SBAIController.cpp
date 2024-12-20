@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 
 #include "AI/SBAIController.h"
@@ -28,7 +29,8 @@ void ASBAIController::OnPossess(APawn* InPawn)
 void ASBAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	const auto AimActor = GetFocusOnActor();
+
+	AActor* AimActor = GetFocusOnActor();
 	SetFocus(AimActor);
 }
 
@@ -38,5 +40,6 @@ AActor* ASBAIController::GetFocusOnActor()
 	{
 		return nullptr;
 	}
+	
 	return Cast<AActor>(GetBlackboardComponent()->GetValueAsObject(FocusOnKeyName));
 }

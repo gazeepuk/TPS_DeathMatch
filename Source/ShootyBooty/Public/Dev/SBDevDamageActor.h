@@ -1,4 +1,5 @@
-// ShootyBooty by @GazeePuk. All Rights Reversed
+// Developed by Ivan Piankouski
+// GitHub / LinkedIn: gazeepuk
 
 #pragma once
 
@@ -12,12 +13,9 @@ class SHOOTYBOOTY_API ASBDevDamageActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ASBDevDamageActor();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* SceneComponent;
@@ -39,7 +37,6 @@ protected:
 
 	
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 };
