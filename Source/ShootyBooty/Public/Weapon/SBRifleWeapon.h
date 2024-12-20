@@ -16,6 +16,8 @@ class SHOOTYBOOTY_API ASBRifleWeapon : public ASBBaseWeapon
 	GENERATED_BODY()
 
 public:
+	ASBRifleWeapon();
+	
 	virtual void StartFire() override;
 	virtual void StopFire() override;
 
@@ -24,7 +26,7 @@ protected:
 	float TimeBetweenShots = 0.1f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	double BulletSpreed = 1.5f;
+	double BulletSpreed = 1.2f;
 
 	virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) override;
 	virtual void Server_MakeShot_Implementation() override;

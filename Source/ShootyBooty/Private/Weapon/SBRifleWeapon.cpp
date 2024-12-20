@@ -5,6 +5,11 @@
 #include "Weapon/SBRifleWeapon.h"
 #include"Engine/DamageEvents.h"
 
+ASBRifleWeapon::ASBRifleWeapon()
+{
+	TraceMaxDistance = 50000.f;
+}
+
 void ASBRifleWeapon::StartFire()
 {
 	GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASBBaseWeapon::StartFire, TimeBetweenShots, true);
