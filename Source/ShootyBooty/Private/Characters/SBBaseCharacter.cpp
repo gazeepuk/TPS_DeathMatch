@@ -58,10 +58,13 @@ bool ASBBaseCharacter::IsRunning() const
 float ASBBaseCharacter::GetMoveDirection() const
 {
 	if (GetVelocity().IsZero()) return 0.0f;
+	
 	const FVector VelocityNormal = GetVelocity().GetSafeNormal();
+	
 	const float AngelBetween = FMath::Acos(FVector::DotProduct(GetActorForwardVector(), VelocityNormal));
 	const FVector CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
 	const float Degrees = FMath::RadiansToDegrees(AngelBetween);
+	
 	return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
 }
 
@@ -71,7 +74,7 @@ void ASBBaseCharacter::NetMulticast_PlayAnimMontage_Implementation(UAnimMontage*
 	PlayAnimMontage(AnimMontage, PlayRate);
 }
 
-//Run on Server
+//Runs on Server
 void ASBBaseCharacter::OnDeath()
 {
 	UE_LOG(LogBaseCharacterLog, Error, TEXT("Player %s is dead"),*GetName())

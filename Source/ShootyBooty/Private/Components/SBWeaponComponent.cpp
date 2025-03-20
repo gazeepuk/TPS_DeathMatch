@@ -26,8 +26,8 @@ void USBWeaponComponent::BeginPlay()
 	if(GetOwner()->HasAuthority())
 	{
 		CurrentWeaponIndex = 0;
-		Server_SpawnWeapons();
-		Server_EquipWeapon(CurrentWeaponIndex);
+		SpawnWeapons();
+		EquipWeapon(CurrentWeaponIndex);
 		InitAnimations();
 	}
 }
