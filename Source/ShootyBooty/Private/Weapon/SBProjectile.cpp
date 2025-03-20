@@ -8,11 +8,13 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 ASBProjectile::ASBProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
+	bReplicates = true;
+	
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
 	CollisionComponent->InitSphereRadius(5.0f);
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -20,6 +22,7 @@ ASBProjectile::ASBProjectile()
 	SetRootComponent(CollisionComponent);
 
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
+	MovementComponent->SetIsReplicated(true);
 	MovementComponent->InitialSpeed = 2500.0f;
 	MovementComponent->ProjectileGravityScale = 0.2f;
 }
@@ -39,6 +42,13 @@ void ASBProjectile::BeginPlay()
 		CollisionComponent->OnComponentHit.AddDynamic(this, &ASBProjectile::OnProjectileHit);
 		SetLifeSpan(LifeSeconds);
 	}
+}
+
+void ASBProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, ShotDirection);
 }
 
 void ASBProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,

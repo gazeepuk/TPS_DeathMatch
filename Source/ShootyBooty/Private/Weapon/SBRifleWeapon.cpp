@@ -39,9 +39,9 @@ bool ASBRifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd)
 	return true;
 }
 
-void ASBRifleWeapon::Server_MakeShot_Implementation()
+void ASBRifleWeapon::MakeShot()
 {
-	Super::Server_MakeShot_Implementation();
+	Super::MakeShot();
 	if (!GetWorld() || IsAmmoEmpty())
 	{
 		StopFire();
@@ -60,7 +60,7 @@ void ASBRifleWeapon::Server_MakeShot_Implementation()
 
 	if (HitResult.bBlockingHit)
 	{
-		Server_MakeDamage(HitResult);
+		MakeDamage(HitResult);
 
 		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0.0f,
 		              3.0f);
@@ -70,11 +70,6 @@ void ASBRifleWeapon::Server_MakeShot_Implementation()
 	{
 		DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0.0f, 3.0f);
 	}
-}
-
-void ASBRifleWeapon::Server_MakeDamage_Implementation(const FHitResult& HitResult)
-{
-	MakeDamage(HitResult);
 }
 
 void ASBRifleWeapon::MakeDamage(const FHitResult& HitResult)

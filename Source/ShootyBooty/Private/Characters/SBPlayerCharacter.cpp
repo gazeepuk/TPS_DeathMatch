@@ -87,6 +87,8 @@ void ASBPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	}
 }
 
+#pragma region InputCallbacks
+
 void ASBPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -142,25 +144,48 @@ void ASBPlayerCharacter::StopSprintInput(const FInputActionValue& Value)
 
 void ASBPlayerCharacter::StartFireInput(const FInputActionValue& Value)
 {
+	if(HasAuthority())
+	{
+		StartFire();
+		return;
+	}
 	Server_StartFire();
 }
 
 void ASBPlayerCharacter::StopFireInput(const FInputActionValue& Value)
 {
+	if(HasAuthority())
+	{
+		StopFire();
+		return;
+	}
 	Server_StopFire();
 }
 
 void ASBPlayerCharacter::EquipNextWeapon(const FInputActionValue& Value)
 {
+	if(HasAuthority())
+	{
+		EquipNextWeapon();
+		return;
+	}
 	Server_EquipNextWeapon();
 }
 
 void ASBPlayerCharacter::ReloadWeapon(const FInputActionValue& Value)
 {
+	if(HasAuthority())
+	{
+		Reload();
+		return;
+	}
 	Server_Reload();
 }
 
-void ASBPlayerCharacter::Server_EquipNextWeapon_Implementation()
+#pragma endregion
+
+#pragma region WeaponInteractions
+void ASBPlayerCharacter::EquipNextWeapon() const
 {
 	if(WeaponComponent)
 	{
@@ -168,7 +193,7 @@ void ASBPlayerCharacter::Server_EquipNextWeapon_Implementation()
 	}
 }
 
-void ASBPlayerCharacter::Server_Reload_Implementation()
+void ASBPlayerCharacter::Reload() const
 {
 	if(WeaponComponent)
 	{
@@ -176,7 +201,7 @@ void ASBPlayerCharacter::Server_Reload_Implementation()
 	}
 }
 
-void ASBPlayerCharacter::Server_StartFire_Implementation()
+void ASBPlayerCharacter::StartFire() const
 {
 	if(WeaponComponent)
 	{
@@ -184,10 +209,34 @@ void ASBPlayerCharacter::Server_StartFire_Implementation()
 	}
 }
 
-void ASBPlayerCharacter::Server_StopFire_Implementation()
+void ASBPlayerCharacter::StopFire() const
 {
 	if(WeaponComponent)
 	{
 		WeaponComponent->StopFire();
 	}
 }
+#pragma endregion
+
+#pragma region WeaponInteractionsRPCs
+void ASBPlayerCharacter::Server_EquipNextWeapon_Implementation()
+{
+	EquipNextWeapon();
+}
+
+void ASBPlayerCharacter::Server_Reload_Implementation()
+{
+	Reload();
+}
+
+void ASBPlayerCharacter::Server_StartFire_Implementation()
+{
+	StartFire();
+}
+
+void ASBPlayerCharacter::Server_StopFire_Implementation()
+{
+	StopFire();
+}
+
+#pragma endregion

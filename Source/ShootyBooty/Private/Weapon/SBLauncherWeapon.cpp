@@ -5,10 +5,10 @@
 #include "Weapon/SBLauncherWeapon.h"
 #include "Weapon/SBProjectile.h"
 
-void ASBLauncherWeapon::Server_MakeShot_Implementation()
+void ASBLauncherWeapon::MakeShot()
 {
 	
-	Super::Server_MakeShot_Implementation();
+	Super::MakeShot();
 	
 	if (!GetWorld() || IsAmmoEmpty())return;
 	
@@ -22,10 +22,10 @@ void ASBLauncherWeapon::Server_MakeShot_Implementation()
 	const FVector Direction = (EndPoint - GetMuzzleWorldLocation()).GetSafeNormal();
 	
 	const FTransform SpawnTransform(FRotator::ZeroRotator,GetMuzzleWorldLocation());
-	NetMulticast_SpawnProjectile(ProjectileClass, SpawnTransform, Direction);
+	SpawnProjectile(ProjectileClass, SpawnTransform, Direction);
 }
 
-void ASBLauncherWeapon::NetMulticast_SpawnProjectile_Implementation(TSubclassOf<ASBProjectile> InProjectileClass,
+void ASBLauncherWeapon::SpawnProjectile(TSubclassOf<ASBProjectile> InProjectileClass,
 	const FTransform& InSpawnTransform, const FVector& InDirection)
 {
 	ASBProjectile* Projectile = GetWorld()->SpawnActorDeferred<ASBProjectile>(ProjectileClass, InSpawnTransform);
@@ -37,4 +37,3 @@ void ASBLauncherWeapon::NetMulticast_SpawnProjectile_Implementation(TSubclassOf<
 		Projectile->FinishSpawning(InSpawnTransform);
 	}
 }
-

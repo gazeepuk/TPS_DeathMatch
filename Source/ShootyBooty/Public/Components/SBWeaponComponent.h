@@ -68,9 +68,6 @@ protected:
 
 	bool CanFire() const;
 	bool CanEquip() const;
-
-	UFUNCTION(Server, Reliable)
-	void Server_EquipWeapon(int32 WeaponIndex);
 	void EquipWeapon(int32 WeaponIndex);
 
 	UPROPERTY(Replicated)
@@ -84,8 +81,6 @@ private:
 	bool bReloadAnimProgress = false;
 
 	//Spawning Weapon in world
-	UFUNCTION(Server, Reliable)
-	void Server_SpawnWeapons();
 	void SpawnWeapons();
 
 	//Attaching weapon to owner socket

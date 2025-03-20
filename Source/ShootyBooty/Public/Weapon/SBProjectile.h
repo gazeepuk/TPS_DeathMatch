@@ -21,7 +21,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	UPROPERTY(VisibleAnywhere, Category="Weapon")
 	UProjectileMovementComponent* MovementComponent;
 
@@ -41,6 +42,7 @@ protected:
 	float LifeSeconds = 7.0f;
 private:
 
+	UPROPERTY(Replicated)
 	FVector ShotDirection;
 
 	UFUNCTION()

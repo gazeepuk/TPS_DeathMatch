@@ -43,11 +43,17 @@ void ASBBaseCharacter::BeginPlay()
 	check(HealthTextComponent);
 	check(GetCharacterMovement());
 
-	OnHealthChanged(HealthComponent->GetHealth());
-	HealthComponent->OnDeath.AddUObject(this, &ASBBaseCharacter::OnDeath);
+	// Callbacks of these Delegates Run on Server
+	if(HasAuthority())
+	{
+		HealthComponent->OnDeath.AddUObject(this, &ASBBaseCharacter::OnDeath);
+		LandedDelegate.AddDynamic(this, &ASBBaseCharacter::OnGroundLanded);
+	}
+
+	// Callbacks of these Delegates Run on Owning Client
 	HealthComponent->OnHealthChanged.AddUObject(this, &ASBBaseCharacter::OnHealthChanged);
+	OnHealthChanged(HealthComponent->GetHealth());
 	
-	LandedDelegate.AddDynamic(this, &ASBBaseCharacter::OnGroundLanded);
 } 
 
 bool ASBBaseCharacter::IsRunning() const
@@ -104,6 +110,11 @@ void ASBBaseCharacter::OnHealthChanged(const float Health) const
 
 void ASBBaseCharacter::Respawn()
 {
+	if(!HasAuthority())
+	{
+		return;
+	}
+	
 	ADeathMatchGameMode* DeathMatchGameMode = GetWorld()->GetAuthGameMode<ADeathMatchGameMode>();
 	if(DeathMatchGameMode)
 	{

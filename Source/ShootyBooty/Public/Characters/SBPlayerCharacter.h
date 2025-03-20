@@ -66,12 +66,16 @@ private:
 private:
 	UFUNCTION(Server,Reliable)
 	void Server_EquipNextWeapon();
+	void EquipNextWeapon() const;
 	UFUNCTION(Server, Reliable)
 	void Server_Reload();
+	void Reload() const;
 	UFUNCTION(Server, Reliable)
 	void Server_StartFire();
+	void StartFire() const;
 	UFUNCTION(Server, Reliable)
 	void Server_StopFire();
+	void StopFire() const;
 };
 
 

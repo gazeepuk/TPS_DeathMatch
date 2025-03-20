@@ -93,9 +93,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="UI")
 	FWeaponUIData UIData;
-
-	UFUNCTION(Server,Reliable)
-	virtual void Server_MakeShot();
+	
+	virtual void MakeShot();
 
 	APlayerController* GetPlayerController() const;
 

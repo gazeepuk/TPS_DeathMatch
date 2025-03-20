@@ -64,7 +64,45 @@ void USBWeaponComponent::EquipNextWeapon()
 	if (!CanEquip()) return;
 
 	CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
-	Server_EquipWeapon(CurrentWeaponIndex);
+	EquipWeapon(CurrentWeaponIndex);
+}
+
+void USBWeaponComponent::EquipWeapon(int32 WeaponIndex)
+{
+	if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
+	{
+		UE_LOG(LogWeaponComponent, Error, TEXT("Invalid Weapon Index"));
+		return;
+	}
+	if (Weapons.Num() <= 0)
+	{
+		return;
+	}
+	
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (!Character)
+	{
+		return;
+	}
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->StopFire();
+		AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
+	}
+
+	CurrentWeapon = Weapons[WeaponIndex];
+
+	const FWeaponData* CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData Data)
+	{
+		return Data.WeaponClass == CurrentWeapon->GetClass();
+	});
+
+	CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+
+	AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
+	bEquipAnimProgress = true;
+	NetMulticast_PlayAnimMontage(EquipAnimMontage, 1.f);
 }
 
 void USBWeaponComponent::Server_EndPlay_Implementation()
@@ -80,17 +118,20 @@ void USBWeaponComponent::Server_EndPlay_Implementation()
 
 void USBWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if(GetOwner()->HasAuthority())
+	{
+		CurrentWeapon = nullptr;
+		for (ASBBaseWeapon* Weapon : Weapons)
+		{
+			Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			Weapon->Destroy();
+		}
+		Weapons.Empty();
+	}
 	Server_EndPlay();
 
 	Super::EndPlay(EndPlayReason);
 }
-
-
-void USBWeaponComponent::Server_SpawnWeapons_Implementation()
-{
-	SpawnWeapons();
-}
-
 
 void USBWeaponComponent::SpawnWeapons()
 {
@@ -131,49 +172,6 @@ void USBWeaponComponent::AttachWeaponToSocket(ASBBaseWeapon* Weapon, USceneCompo
 	
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
 	Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
-}
-
-void USBWeaponComponent::Server_EquipWeapon_Implementation(int32 WeaponIndex)
-{
-	EquipWeapon(WeaponIndex);
-}
-
-void USBWeaponComponent::EquipWeapon(int32 WeaponIndex)
-{
-	if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
-	{
-		UE_LOG(LogWeaponComponent, Error, TEXT("Invalid Weapon Index"));
-		return;
-	}
-	if (Weapons.Num() <= 0)
-	{
-		return;
-	}
-	
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (!Character)
-	{
-		return;
-	}
-
-	if (CurrentWeapon)
-	{
-		CurrentWeapon->StopFire();
-		AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
-	}
-
-	CurrentWeapon = Weapons[WeaponIndex];
-
-	const FWeaponData* CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData Data)
-	{
-		return Data.WeaponClass == CurrentWeapon->GetClass();
-	});
-
-	CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
-
-	AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
-	bEquipAnimProgress = true;
-	Server_PlayAnimMontage(EquipAnimMontage, 1.f);
 }
 
 void USBWeaponComponent::Reload()
@@ -303,7 +301,7 @@ void USBWeaponComponent::ChangeClip()
 	CurrentWeapon->StopFire();
 	CurrentWeapon->ChangeClip();
 	bReloadAnimProgress = true;
-	Server_PlayAnimMontage(CurrentReloadAnimMontage, 1.f);
+	NetMulticast_PlayAnimMontage(CurrentReloadAnimMontage, 1.f);
 }
 
 bool USBWeaponComponent::CanFire() const

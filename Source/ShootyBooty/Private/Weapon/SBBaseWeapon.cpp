@@ -57,7 +57,11 @@ void ASBBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	check(WeaponMesh);
-	CurrentAmmo = DefaultAmmo;
+	
+	if(HasAuthority())
+	{
+		CurrentAmmo = DefaultAmmo;
+	}
 }
 
 void ASBBaseWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -69,14 +73,14 @@ void ASBBaseWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 void ASBBaseWeapon::StartFire()
 {
-	Server_MakeShot();
+	MakeShot();
 }
 
 void ASBBaseWeapon::StopFire()
 {
 }
 
-void ASBBaseWeapon::Server_MakeShot_Implementation()
+void ASBBaseWeapon::MakeShot()
 {
 	if (!IsAmmoEmpty())
 	{
