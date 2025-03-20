@@ -21,4 +21,9 @@ public:
 
 protected:
 	virtual void OnDeath() override;
+
+private:
+	void Cleanup();
+
+	FTimerHandle CleanupTimerHandle;
 };

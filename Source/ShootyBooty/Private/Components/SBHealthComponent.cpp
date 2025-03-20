@@ -81,10 +81,9 @@ void USBHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, con
 		ADeathMatchGameMode* DeathMatchGameMode = GetWorld()->GetAuthGameMode<ADeathMatchGameMode>();
 		if(DeathMatchGameMode)
 		{
-			ASBPlayerCharacter* OwningCharacter = GetOwner<ASBPlayerCharacter>();
-			ADeathMatchPlayerController* VictimController = OwningCharacter ? OwningCharacter->GetController<ADeathMatchPlayerController>() : nullptr;
-			ADeathMatchPlayerController* AttackerController = InstigatedBy ? Cast<ADeathMatchPlayerController>(InstigatedBy) : nullptr;
-			DeathMatchGameMode->PlayerEliminated(GetOwner<ASBPlayerCharacter>(), VictimController, AttackerController);
+			ASBBaseCharacter* OwningCharacter = GetOwner<ASBBaseCharacter>();
+			AController* VictimController = OwningCharacter ? OwningCharacter->GetController() : nullptr;
+			DeathMatchGameMode->PlayerEliminated(OwningCharacter, VictimController, InstigatedBy);
 		}
 		
 		//OnDeath.Broadcast();

@@ -53,14 +53,14 @@ void ADeathMatchGameMode::Tick(float DeltaSeconds)
 	}
 }
 
-void ADeathMatchGameMode::PlayerEliminated(ASBPlayerCharacter* EliminatedCharacter,
-	ADeathMatchPlayerController* VictimController, ADeathMatchPlayerController* AttackerController)
+void ADeathMatchGameMode::PlayerEliminated(ASBBaseCharacter* EliminatedCharacter,
+                                           AController* VictimController, AController* AttackerController)
 {
 	if(EliminatedCharacter)
 	{
 		EliminatedCharacter->OnDeath();
 	}
-
+	
 	if(AttackerController)
 	{
 		ADeathMatchPlayerState* DeathMatchPlayerState = AttackerController->GetPlayerState<ADeathMatchPlayerState>();

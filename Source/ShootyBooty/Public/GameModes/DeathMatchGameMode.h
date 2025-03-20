@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SBBaseCharacter.h"
 #include "GameFramework/GameMode.h"
 #include "DeathMatchGameMode.generated.h"
 
@@ -30,7 +31,7 @@ public:
 	FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
 	FORCEINLINE float GetLevelStartingTime() const { return LevelStartingTime; }
 
-	virtual void PlayerEliminated(ASBPlayerCharacter* EliminatedCharacter, ADeathMatchPlayerController* VictimController, ADeathMatchPlayerController* AttackerController);
+	virtual void PlayerEliminated(ASBBaseCharacter* EliminatedCharacter, AController* VictimController, AController* AttackerController);
 	void RespawnPlayer(ACharacter* EliminatedCharacter, AController* EliminatedController);
 	
 protected:

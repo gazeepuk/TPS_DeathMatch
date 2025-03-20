@@ -26,15 +26,17 @@ protected:
     UPROPERTY(EditAnywhere, Category="Pickups")
     float RespawnTime = 5.0f;
     
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual bool GivePickupTo(APawn* InPlayerPawn);
+
+
 private:	
 	virtual void Tick(float DeltaSeconds) override;
-	UFUNCTION(Server,Reliable)
-	void Server_OnPickupWasTaken();
-	UFUNCTION(Server,Reliable)
-	void Server_Respawn() const;
+	void OnPickupWasTaken();
+	void Respawn() const;
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_SetVisibility(bool bVisible, bool bPropagateToChildren) const;
 	void AddMovement();
+
+	UFUNCTION()
+	void OnPickupCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 };

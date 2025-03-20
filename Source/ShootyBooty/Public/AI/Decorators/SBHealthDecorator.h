@@ -17,7 +17,7 @@ public:
 	USBHealthDecorator();
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
-	float HealthPercent = 0.6f;
+	float RequiredHealthPercent = 0.6f;
 
 	// Checking if AI-character should find a Health pickup 
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;

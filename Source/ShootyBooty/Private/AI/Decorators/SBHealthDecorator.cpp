@@ -26,5 +26,5 @@ bool USBHealthDecorator::CalculateRawConditionValue(UBehaviorTreeComponent& Owne
 		return false;
 	}
 
-	return HealthComponent->GetHealthPercent() <= HealthPercent;
+	return HealthComponent->GetHealthPercent() <= RequiredHealthPercent;
 }

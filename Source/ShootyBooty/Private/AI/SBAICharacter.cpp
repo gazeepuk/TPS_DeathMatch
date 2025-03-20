@@ -8,6 +8,7 @@
 #include "SBAIWeaponComponent.h"
 #include "AI/SBAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameModes/DeathMatchGameMode.h"
 
 ASBAICharacter::ASBAICharacter(const FObjectInitializer& ObjInit)
 : Super(ObjInit.SetDefaultSubobjectClass<USBAIWeaponComponent>("WeaponComponent"))
@@ -25,11 +26,21 @@ ASBAICharacter::ASBAICharacter(const FObjectInitializer& ObjInit)
 
 void ASBAICharacter::OnDeath()
 {
-	Super::OnDeath();
+	NetMulticast_OnDeath();
+	float CleanupRate = DeathAnimMontage ? DeathAnimMontage->GetPlayLength() + 2.f : 3.f;
+	
+	GetWorldTimerManager().ClearTimer(CleanupTimerHandle);
+	GetWorldTimerManager().SetTimer(CleanupTimerHandle, this, &ThisClass::Cleanup, CleanupRate);
+}
 
-	const auto SBController =  Cast<AAIController>(Controller);
+void ASBAICharacter::Cleanup()
+{
+	AAIController* SBController = Cast<AAIController>(Controller);
 	if(SBController && SBController->BrainComponent)
 	{
 		SBController->BrainComponent->Cleanup();
+		SBController->Destroy();
 	}
+	
+	Destroy();
 }
