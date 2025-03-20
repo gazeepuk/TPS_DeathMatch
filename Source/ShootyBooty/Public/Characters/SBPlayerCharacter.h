@@ -61,7 +61,7 @@ private:
 	virtual void StopFireInput(const FInputActionValue& Value);
 	virtual void EquipNextWeapon(const FInputActionValue& Value);
 	virtual void ReloadWeapon(const FInputActionValue& Value);
-
+	
 	// ~Combat
 private:
 	UFUNCTION(Server,Reliable)
@@ -76,6 +76,9 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_StopFire();
 	void StopFire() const;
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetWantToRun(const bool InWantToRun);
 };
 
 

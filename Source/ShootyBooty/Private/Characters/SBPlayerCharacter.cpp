@@ -110,8 +110,6 @@ void ASBPlayerCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
-
-	bMovingForward = MovementVector.Y > 0;
 }
 
 void ASBPlayerCharacter::Look(const FInputActionValue& Value)
@@ -134,12 +132,25 @@ void ASBPlayerCharacter::StartJumpInput(const FInputActionValue& Value)
 
 void ASBPlayerCharacter::StartSprintInput(const FInputActionValue& Value)
 {
-	bWantsToRun = true;
+	if(HasAuthority())
+	{
+		bWantsToRun = true;
+		return;
+	}
+
+	Server_SetWantToRun(true);
+	
 }
 
 void ASBPlayerCharacter::StopSprintInput(const FInputActionValue& Value)
 {
-	bWantsToRun = false;
+	if(HasAuthority())
+	{
+		bWantsToRun = false;
+		return;
+	}
+
+	Server_SetWantToRun(false);
 }
 
 void ASBPlayerCharacter::StartFireInput(const FInputActionValue& Value)
@@ -215,6 +226,11 @@ void ASBPlayerCharacter::StopFire() const
 	{
 		WeaponComponent->StopFire();
 	}
+}
+
+void ASBPlayerCharacter::Server_SetWantToRun_Implementation(const bool InWantToRun)
+{
+	bWantsToRun = InWantToRun;
 }
 #pragma endregion
 

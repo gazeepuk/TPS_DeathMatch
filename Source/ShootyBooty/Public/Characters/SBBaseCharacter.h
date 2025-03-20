@@ -26,6 +26,7 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	//Health
 protected:
@@ -69,12 +70,13 @@ protected:
 
 	//Movement
 protected:
+	UPROPERTY(Replicated)
 	bool bWantsToRun = false;
-	bool bMovingForward = false;
 
 public:	
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	bool IsRunning() const;
+	bool IsMovingForward() const;
 
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	float GetMoveDirection() const;

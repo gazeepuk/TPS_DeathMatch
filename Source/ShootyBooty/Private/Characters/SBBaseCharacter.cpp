@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameModes/DeathMatchGameMode.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseCharacterLog, All, All);
 
@@ -54,11 +55,26 @@ void ASBBaseCharacter::BeginPlay()
 	HealthComponent->OnHealthChanged.AddUObject(this, &ASBBaseCharacter::OnHealthChanged);
 	OnHealthChanged(HealthComponent->GetHealth());
 	
-} 
+}
+
+void ASBBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, bWantsToRun);
+}
 
 bool ASBBaseCharacter::IsRunning() const
 {
-	return bWantsToRun && bMovingForward && !GetVelocity().IsZero();
+	return bWantsToRun && IsMovingForward() && !GetVelocity().IsZero();
+}
+
+bool ASBBaseCharacter::IsMovingForward() const
+{
+	FVector Velocity = GetCharacterMovement()->Velocity;
+	FVector ForwardVector = GetActorForwardVector();
+
+	return FVector::DotProduct(Velocity.GetSafeNormal(), ForwardVector) > 0.2;
 }
 
 float ASBBaseCharacter::GetMoveDirection() const
